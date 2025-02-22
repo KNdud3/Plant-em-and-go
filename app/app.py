@@ -1,6 +1,6 @@
 # app/app.py
 from flask import Flask, render_template, request, redirect, url_for, session
-from helper.db import User, db
+# from helper.db import User, db
 import os
 from flask_sqlalchemy import SQLAlchemy
 
