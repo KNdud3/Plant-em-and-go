@@ -3,6 +3,9 @@ from flask import Flask, render_template, request, redirect, url_for, session
 # from helper.db import User, db
 import os
 from flask_sqlalchemy import SQLAlchemy
+import requests
+import json
+
 
 app = Flask(__name__, template_folder='static')
 
@@ -77,6 +80,22 @@ def register():
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('home'))
+
+
+@app.route("/testPlantAPI")
+def testPlantAPI():
+    # Make request to plant API and return a JSON string with correct information
+    api_url = "https://my-api.plantnet.org/v2/identify/all?nb-results=1&api-key=2b10sbrhApe42g9nJ0ypm2lcO"
+    image = open("../assets/dandelion.jpg", 'rb')
+    file = [('images', image)]
+    response = requests.post(api_url, files=file, data = {})
+    result = response.json()
+
+    # Parse JSON
+    speciesName = (result['bestMatch'])
+    commonName = (result['results'][0]['species']['commonNames'][0])
+    return ("Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(speciesName,commonName,result))
+
 
 if __name__ == "__main__":
     makeDB()
