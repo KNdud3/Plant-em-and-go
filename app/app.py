@@ -34,15 +34,18 @@ class Plants(db.Model):
     __tablename__ = "Plants"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    family_name = db.Column(db.String(50), nullable = False)
+    family = db.Column(db.String(50), nullable = False)
     species_name = db.Column(db.String(50), nullable = False)
+    genus = db.Column(db.String(50), nullable = False)
     common_name = db.Column(db.String(50), nullable = False)
-    rarity = db.Column(db.String(50),nullable = False, default = "Rare")
+    rarity = db.Column(db.String(50), nullable = False, default = "Rare")
 
-    def __init__(self, family_name, species_name, common_name):
+    def __init__(self, family_name, species_name, genus, common_name, rarity):
         self.family_name = family_name
         self.species_name = species_name
+        self.genus = genus
         self.common_name = common_name
+        self.rarity = rarity
 
 class User_Plants(db.Model):
     __tablename__ = "User_Plants"
@@ -198,6 +201,10 @@ def logout():
     return redirect(url_for('home'))
 
 
+#{
+# "b64image": "string",
+# "user": "name"
+#}
 @app.route("/testPlantAPI", methods = ['POST'])
 def testPlantAPI():
     # Receive base64 image
@@ -218,10 +225,39 @@ def testPlantAPI():
     result = response.json()
 
     # Parse JSON
-    speciesName = (result['bestMatch'])
+    species = (result['results'][0]['species']['scientificNameWithoutAuthor'])
     commonName = (result['results'][0]['species']['commonNames'][0])
-    # return ("Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(speciesName,commonName,result))
-    return jsonify({"data":"Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(speciesName,commonName,result)})
+    family = (result['results'][0]['species']['family']['scientificNameWithoutAuthor'])
+    genus = (result['results'][0]['species']['genus']['scientificNameWithoutAuthor'])
+
+    storedPlant = Plants.query.filter_by(id=1).first(species_name = species).first()
+    newPlant = False
+    if not storedPlant:
+        newPlant = True
+    else:
+        user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = storedPlant.id)
+        if not user_has_plant:
+            newPlant = True
+    addPlantToUser(username,family,species,genus,commonName)
+    rarity = (Plants.query.filter_by(species_name = species).first()).rarity
+    scoreToAdd = score.scoreAlgorithm(newPlant, rarity, user.daily_multiplier)
+    if user.num_pics_today > 5:
+        scoreToAdd = score.scoreAlgorithm(newPlant, rarity, user.daily_multiplier)
+        user.score += scoreToAdd
+        user.num_pics_today -= 1
+        db.session.commit()
+
+    return jsonify({"family": family, "species": species, "genus": genus, "common_name": commonName, "rarity": rarity})
+
+def addPlantToUser(user_name, family, species, genus, common):
+    plant = Plants.query.filter_by(species_name = species).first()
+    user = User.query.filter_by(username = user_name).first()
+    if not plant:
+        db.session.add(Plants(family, species, genus, common, "Rare"))
+        plant = Plants.query.filter_by(species_name = species).first()
+    db.session.add(User_Plants(user.id, plant.id))
+    db.session.commit()
+
 
 #{
 # "species_name": "name",
@@ -243,14 +279,13 @@ def plantinfo():
     return jsonify({"plant_family": plant.family_name, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
 
 if __name__ == "__main__":
+    makeDB()
     # with app.app_context():
-    #     makeDB()
     #     new_user = User("theRat", "ratatouille25")
     #     db.session.add(new_user)
     #     new_plant = Plants("grass", "green grass", "grass blade")
     #     db.session.add(new_plant)
     #     db.session.add(User_Plants(1,1))
     #     db.session.commit()
-    makeDB()
     # check for new day so we can reset num_pics_today
     app.run(debug=True)
