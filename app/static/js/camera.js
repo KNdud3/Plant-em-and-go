@@ -1,17 +1,28 @@
-import { Camera, CameraResultType, CameraSource } from 'https://cdn.jsdelivr.net/npm/@capacitor/camera/dist/esm/index.js';
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("cameraButton").addEventListener("click", takePicture);
+});
 
-window.takePhoto = async function() {
+async function takePicture() {
+    console.log("Opening Camera...");
+
     try {
-        const image = await Camera.getPhoto({
-            quality: 90,
-            allowEditing: false,
-            resultType: CameraResultType.Uri,
-            source: CameraSource.Camera
+        // Correct way to access plugins
+        const camera = Capacitor.Plugins.Camera;
+        
+        if (!camera) {
+            throw new Error("Camera plugin is not available!");
+        }
+
+        const photo = await camera.getPhoto({
+            resultType: "uri",  // Use "dataUrl" for base64 images
+            source: "CAMERA",
+            quality: 100
         });
 
-        document.getElementById("capturedImage").src = image.webPath;
-        document.getElementById("capturedImage").style.display = "block";
+        const imageUrl = photo.webPath;
+        document.getElementById("capturedImage").src = imageUrl;
+
     } catch (error) {
-        console.error("Camera error:", error);
+        console.error("Error taking picture:", error);
     }
-};
+}
