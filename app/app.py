@@ -37,6 +37,7 @@ class Plants(db.Model):
     family_name = db.Column(db.String(50), nullable = False)
     species_name = db.Column(db.String(50), nullable = False)
     common_name = db.Column(db.String(50), nullable = False)
+    rarity = db.Column(db.String(50),nullable = False, default = "Rare")
 
     def __init__(self, family_name, species_name, common_name):
         self.family_name = family_name
@@ -109,14 +110,13 @@ def returnScore():
     name = data['user']
     user = User.query.filter_by(username = name).first()
     multiplier = user.daily_multiplier
-    # If multiplier has increased
     new_mult = score.getMultDict(steps)
-    if  new_mult < multiplier:
+    if  new_mult != multiplier: # new_mult should always be >= multiplier
         # Retrieve relevant fields
         daily_score = user.daily_score
         total_score = user.score
 
-        ## update score
+        # Update score
         total_score -= daily_score
         daily_score = (daily_score / multiplier) * new_mult
         total_score += daily_score
@@ -129,50 +129,10 @@ def returnScore():
         db.session.commit()
     return jsonify({"user_score": user.score}), 200
 
-
-    
-
-
-
-    
-        
-    
-
-
 @app.route("/")
 def home():
     return jsonify(message="Hello from Flask!")
     # return render_template("index.html")
-# app/app.py
-
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'users.db')
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# db = SQLAlchemy(app)
-
-# class User(db.Model):
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     username = db.Column(db.String(100), nullable=False, unique = True)
-#     password = db.Column(db.String(100), nullable=False)
-
-#     def __init__(self, username, password):
-#         self.username = username
-#         self.password = password
-
-
-
-# def makeDB():
-#     with app.app_context():
-#         db.create_all()  # Create tables based on the defined models
-
-# app.secret_key = 'your-secret-key-here'  # Required for sessions
-
-# @app.route("/")
-# def home():
-#     if 'user_id' in session:
-#         user = User.query.get(session['user_id'])
-#         return render_template("index.html")
-#     return render_template("index.html")
 
 @app.route('/upload-photo', methods=['POST'])
 def upload_photo():
@@ -243,7 +203,9 @@ def testPlantAPI():
     # Receive base64 image
     data = request.get_json()
     b64Image = data['b64']
-    # print(f"Received request to /testPlantAPI\nImage:{b64Image}")
+    username = data.get("user")
+    user = User.filter_by(username = username)
+
     decoded = base64.b64decode(b64Image)
     file_like = BytesIO(decoded)
 
