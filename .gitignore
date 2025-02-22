@@ -50,3 +50,7 @@ logs/
 # Coverage reports
 .coverage
 htmlcov/
+
+
+node_modules
+android
