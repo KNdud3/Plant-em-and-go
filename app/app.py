@@ -1,6 +1,5 @@
 # app/app.py
 from flask import Flask, render_template, request, redirect, url_for, session
-from helper.db import User, db
 import os
 from flask_sqlalchemy import SQLAlchemy
 import requests
@@ -14,6 +13,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 class User(db.Model):
+    __tablename__ = "Users"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(100), nullable=False, unique = True)
     password = db.Column(db.String(100), nullable=False)
@@ -22,6 +22,33 @@ class User(db.Model):
         self.username = username
         self.password = password
 
+class Plants(db.Model):
+    __tablename__ = "Plants"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    family_name = db.Column(db.String(50), nullable = False)
+    species_name = db.Column(db.String(50), nullable = False)
+    common_name = db.Column(db.String(50), nullable = False)
+
+    def __init__(self, family_name, species_name, common_name):
+        self.family_name = family_name
+        self.species_name = species_name
+        self.common_name = common_name
+
+class User_Plants(db.Model):
+    __tablename__ = "User_Plants"
+
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), primary_key=True)
+    plant_id = db.Column(db.Integer, db.ForeignKey('Plants.id'), primary_key=True)
+    
+    __table_args__ = (db.PrimaryKeyConstraint('user_id', 'plant_id'),)
+
+    def __init__(self, user, plant):
+        self.user_id = user
+        self.plant_id = plant
+
+    
+
 
 
 def makeDB():
@@ -29,6 +56,8 @@ def makeDB():
         db.create_all()  # Create tables based on the defined models
 
 app.secret_key = 'your-secret-key-here'  # Required for sessions
+
+
 
 @app.route("/")
 def home():
@@ -98,5 +127,13 @@ def testPlantAPI():
 
 
 if __name__ == "__main__":
+    # with app.app_context():
+        # makeDB()
+        # new_user = User("theRat", "ratatouille25")
+        # db.session.add(new_user)
+        # new_plant = Plants("grass", "green grass", "grass blade")
+        # db.session.add(new_plant)
+        # db.session.add(User_Plants(1,1))
+        # db.session.commit()
     makeDB()
     app.run(debug=True)
