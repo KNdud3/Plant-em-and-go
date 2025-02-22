@@ -251,9 +251,6 @@ def testPlantAPI():
     # Receive base64 image
     data = request.get_json()
     b64Image = data['b64']
-    # print(f"Received request to /testPlantAPI\nImage:{b64Image}")
-    info = request.get_json()
-    b64Image = info['b64image']
     decoded = base64.b64decode(b64Image)
     file_like = BytesIO(decoded)
 
