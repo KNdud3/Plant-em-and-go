@@ -203,8 +203,9 @@ def logout():
 @app.route("/testPlantAPI", methods = ['POST'])
 def testPlantAPI():
     # Receive base64 image
-    info = request.get_json()
-    b64Image = request['b64image']
+    data = request.get_json()
+    b64Image = data['b64']
+    # print(f"Received request to /testPlantAPI\nImage:{b64Image}")
     decoded = base64.b64decode(b64Image)
     file_like = BytesIO(decoded)
 
@@ -219,7 +220,8 @@ def testPlantAPI():
     # Parse JSON
     speciesName = (result['bestMatch'])
     commonName = (result['results'][0]['species']['commonNames'][0])
-    return ("Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(speciesName,commonName,result))
+    # return ("Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(speciesName,commonName,result))
+    return jsonify({"data":"Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(speciesName,commonName,result)})
 
 
 @app.route("/plantinfo", methods = ['GET'])
