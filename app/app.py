@@ -69,13 +69,13 @@ app.secret_key = 'your-secret-key-here'  # Required for sessions
 def checkDate():
     data = request.get_json()
     dateInts = [int(i) for i in data.get("date").split("-")]
-    currDate = datetime.datetime(dateInts[0], dateInts[1], dateInts[2])
+    currDate = datetime.date(dateInts[0], dateInts[1], dateInts[2])
     storedDate = Date.query.filter_by(id=1).first()
     if not storedDate:
         addDate = Date()
         db.session.add(addDate)
         db.session.commit()
-        return False
+        return jsonify({"status": "new_day"}), 200
     elif storedDate.current_date != currDate:
         # Bulk update: Set daily_score to 0, num_pics_today to 0 and daily_multiplier to 1 for all users
         db.session.query(User).update({
@@ -84,9 +84,8 @@ def checkDate():
             User.num_pics_today: 0
         })
         # Commit changes to the database
-        db.session.commit()
-        return False
-    return True
+        return jsonify({"status": "new_day"}), 200
+    return jsonify({"status": "same_day"}), 200  # No change in date
         
     
 
