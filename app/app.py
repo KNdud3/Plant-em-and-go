@@ -1,26 +1,60 @@
-# app/app.py
-from flask import Flask, render_template, request, redirect, url_for, session
-from helper.db import User, db
+from flask import Flask, render_template,jsonify, request, redirect, url_for, session
+from flask_cors import CORS
 import os
 from flask_sqlalchemy import SQLAlchemy
 import requests
+import datetime
 import json
-
-
 app = Flask(__name__, template_folder='static')
-
+CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'users.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 class User(db.Model):
+    __tablename__ = "Users"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(100), nullable=False, unique = True)
     password = db.Column(db.String(100), nullable=False)
+    score = db.Column(db.Integer, nullable=False, default = 0)
+    daily_multiplier = db.Column(db.Float, nullable = False, default = 1)
+    daily_score = db.Column(db.Integer, nullable = False, default = 0)
+    num_pics_today = db.Column(db.Integer, nullable = False, default = 0)
 
     def __init__(self, username, password):
         self.username = username
         self.password = password
+
+class Plants(db.Model):
+    __tablename__ = "Plants"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    family_name = db.Column(db.String(50), nullable = False)
+    species_name = db.Column(db.String(50), nullable = False)
+    common_name = db.Column(db.String(50), nullable = False)
+
+    def __init__(self, family_name, species_name, common_name):
+        self.family_name = family_name
+        self.species_name = species_name
+        self.common_name = common_name
+
+class User_Plants(db.Model):
+    __tablename__ = "User_Plants"
+
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), primary_key=True)
+    plant_id = db.Column(db.Integer, db.ForeignKey('Plants.id'), primary_key=True)
+    
+    __table_args__ = (db.PrimaryKeyConstraint('user_id', 'plant_id'),)
+
+    def __init__(self, user, plant):
+        self.user_id = user
+        self.plant_id = plant
+
+# Stores the date so we can know when the user has entered a new day
+class Date(db.Model):
+    __tablename__ = "Date"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    current_date = db.Column(db.Date, nullable = False, default = datetime.date.today)
 
 
 
@@ -34,16 +68,33 @@ app.secret_key = 'your-secret-key-here'  # Required for sessions
 @app.route('/receivedate', methods=['POST'])
 def checkDate():
     data = request.get_json()
-    dateInts = x = [int(i) for i in data["date"].split("-")]
-    isSame 
+    dateInts = [int(i) for i in data.get("date").split("-")]
+    currDate = datetime.datetime(dateInts[0], dateInts[1], dateInts[2])
+    storedDate = Date.query.filter_by(id=1).first()
+    if not storedDate:
+        addDate = Date()
+        db.session.add(addDate)
+        db.session.commit()
+        return False
+    elif storedDate.current_date != currDate:
+        # Bulk update: Set daily_score to 0, num_pics_today to 0 and daily_multiplier to 1 for all users
+        db.session.query(User).update({
+            User.daily_score: 0,
+            User.daily_multiplier: 1,
+            User.num_pics_today: 0
+        })
+        # Commit changes to the database
+        db.session.commit()
+        return False
+    return True
+        
+    
 
 
 @app.route("/")
 def home():
-    if 'user_id' in session:
-        user = User.query.get(session['user_id'])
-        return render_template("index.html")
-    return render_template("index.html")
+    return jsonify(message="Hello from Flask!")
+
 
 @app.route("/Steps")
 def steps():
@@ -84,6 +135,7 @@ def register():
     
     return render_template("./templates/Register.html")
 
+
 @app.route("/logout")
 def logout():
     session.pop('user_id', None)
@@ -107,4 +159,5 @@ def testPlantAPI():
 
 if __name__ == "__main__":
     makeDB()
+    # check for new day so we can reset num_pics_today
     app.run(debug=True)
