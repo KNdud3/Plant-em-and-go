@@ -249,8 +249,9 @@ def logout():
 @app.route("/testPlantAPI", methods = ['POST'])
 def testPlantAPI():
     # Receive base64 image
-    info = request.get_json()
-    b64Image = info['b64image']
+    data = request.get_json()
+    b64Image = data['b64']
+    # print(f"Received request to /testPlantAPI\nImage:{b64Image}")
     decoded = base64.b64decode(b64Image)
     file_like = BytesIO(decoded)
 
@@ -265,20 +266,7 @@ def testPlantAPI():
     # Parse JSON
     species = (result['results'][0]['species']['scientificNameWithoutAuthor'])
     commonName = (result['results'][0]['species']['commonNames'][0])
-    family = (result['results'][0]['species']['family']['scientificNameWithoutAuthor'])
-    genus = (result['results'][0]['species']['genus']['scientificNameWithoutAuthor'])
-
-    addPlantToUser()
-    return ("Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(species,commonName,result))
-
-def addPlantToUser(user_name, family, species, genus, common):
-    plant = Plants.query.filter_by(species_name = species).first()
-    user = User.query.filter_by(username = user_name).first()
-    if not plant:
-        db.session.add(Plants(family, species, genus, common, "Rare"))
-        plant = Plants.query.filter_by(species_name = species).first()
-    db.session.add(User_Plants(user.id, plant.id))
-
+    return ("Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(speciesName,commonName,result))
 
 #{
 # "species_name": "name",
