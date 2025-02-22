@@ -13,9 +13,6 @@ def home():
 # app/app.py
 
 
-
-app = Flask(__name__, template_folder='static')
-
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'users.db')
 # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # db = SQLAlchemy(app)
