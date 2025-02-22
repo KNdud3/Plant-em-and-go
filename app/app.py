@@ -10,5 +10,6 @@ def home():
 def steps():
     return render_template("Steps.html")
 
+
 if __name__ == "__main__":
     app.run(debug=True)
