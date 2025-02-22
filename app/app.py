@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import os
 from flask_sqlalchemy import SQLAlchemy
 import requests
+import datetime
 import json
 
 
@@ -18,6 +19,9 @@ class User(db.Model):
     username = db.Column(db.String(100), nullable=False, unique = True)
     password = db.Column(db.String(100), nullable=False)
     score = db.Column(db.Integer, nullable=False, default = 0)
+    daily_multiplier = db.Column(db.Float, nullable = False, default = 1)
+    daily_score = db.Column(db.Integer, nullable = False, default = 0)
+    num_pics_today = db.Column(db.Integer, nullable = False, default = 0)
 
     def __init__(self, username, password):
         self.username = username
@@ -48,7 +52,10 @@ class User_Plants(db.Model):
         self.user_id = user
         self.plant_id = plant
 
-    
+# Stores the date so we can know when the user has entered a new day
+class Date(db.Model):
+    __tablename__ = "Date"
+    current_date = db.Column(db.Date, nullable = False, primary_key = True, default = datetime.date.today)
 
 
 
@@ -137,4 +144,5 @@ if __name__ == "__main__":
         # db.session.add(User_Plants(1,1))
         # db.session.commit()
     makeDB()
+    # check for new day so we can reset num_pics_today
     app.run(debug=True)
