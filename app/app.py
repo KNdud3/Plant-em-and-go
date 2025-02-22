@@ -30,6 +30,14 @@ def makeDB():
 
 app.secret_key = 'your-secret-key-here'  # Required for sessions
 
+#{"date" : "YYYY-MM-DD"}
+@app.route('/receivedate', methods=['POST'])
+def checkDate():
+    data = request.get_json()
+    dateInts = x = [int(i) for i in data["date"].split("-")]
+    isSame 
+
+
 @app.route("/")
 def home():
     if 'user_id' in session:
