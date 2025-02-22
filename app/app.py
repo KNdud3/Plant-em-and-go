@@ -9,15 +9,15 @@ def home():
 
 @app.route("/Steps")
 def steps():
-    return render_template("Steps.html")
+    return render_template("./templates/Steps.html")
 
 @app.route("/Login")
 def login():
-    return render_template("Login.html")
+    return render_template("./templates/Login.html")
 
 @app.route("/Register")
 def register():
-    return render_template("Register.html")
+    return render_template("./templates/Register.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
