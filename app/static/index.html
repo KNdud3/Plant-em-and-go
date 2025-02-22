@@ -1,11 +1,20 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Capacitor + Flask App</title>
+    <script defer src="js/app.js"></script>
 </head>
 <body>
-    <h1>Hello!!!!! This is a new change! This is android's entry point</h1>
+    <div id="app"></div> <!-- This is where your content will load -->
+<!-- index.html -->
+<a href="./templates/Register.html" onclick="loadPage('home')">Home</a>
+<a href="#login" onclick="loadPage('login')">Login</a>
+<a href="#about" onclick="loadPage('about')">About</a>
+<a href="#contact" onclick="loadPage('contact')">Contact</a>
+
+
 </body>
 </html>
