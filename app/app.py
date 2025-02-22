@@ -1,25 +1,85 @@
-from flask import Flask, render_template
+# app/app.py
+from flask import Flask, render_template, request, redirect, url_for, session
+from helper.db import User, db
+import os
+from flask_sqlalchemy import SQLAlchemy
 import requests
 import json
 
 
 app = Flask(__name__, template_folder='static')
 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'users.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(100), nullable=False, unique = True)
+    password = db.Column(db.String(100), nullable=False)
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+
+
+def makeDB():
+    with app.app_context():
+        db.create_all()  # Create tables based on the defined models
+
+app.secret_key = 'your-secret-key-here'  # Required for sessions
+
 @app.route("/")
 def home():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        return render_template("index.html")
     return render_template("index.html")
 
 @app.route("/Steps")
 def steps():
-    return render_template("Steps.html")
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template("./templates/Steps.html")
 
-@app.route("/Login")
+@app.route("/Login", methods=['GET', 'POST'])
 def login():
-    return render_template("Login.html")
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(username=username, password=password).first()
+        
+        if user:
+            session['user_id'] = user.id
+            return redirect(url_for('home'))
+        return redirect(url_for('login'))
+    
+    return render_template("./templates/Login.html")
 
-@app.route("/Register")
+@app.route("/Register", methods=['GET', 'POST'])
 def register():
-    return render_template("Register.html")
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            return redirect(url_for('register'))
+        
+        new_user = User(username=username, password=password)
+        db.session.add(new_user)
+        db.session.commit()
+        
+        return redirect(url_for('login'))
+    
+    return render_template("./templates/Register.html")
+
+@app.route("/logout")
+def logout():
+    session.pop('user_id', None)
+    return redirect(url_for('home'))
 
 
 @app.route("/testPlantAPI")
@@ -38,4 +98,5 @@ def testPlantAPI():
 
 
 if __name__ == "__main__":
+    makeDB()
     app.run(debug=True)
