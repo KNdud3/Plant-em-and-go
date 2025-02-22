@@ -34,14 +34,18 @@ class Plants(db.Model):
     __tablename__ = "Plants"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    family_name = db.Column(db.String(50), nullable = False)
+    family = db.Column(db.String(50), nullable = False)
     species_name = db.Column(db.String(50), nullable = False)
+    genus = db.Column(db.String(50), nullable = False)
     common_name = db.Column(db.String(50), nullable = False)
+    rarity = db.Column(db.String(50), nullable = False, default = "Rare")
 
-    def __init__(self, family_name, species_name, common_name):
+    def __init__(self, family_name, species_name, genus, common_name, rarity):
         self.family_name = family_name
         self.species_name = species_name
+        self.genus = genus
         self.common_name = common_name
+        self.rarity = rarity
 
 class User_Plants(db.Model):
     __tablename__ = "User_Plants"
@@ -238,11 +242,15 @@ def logout():
     return redirect(url_for('home'))
 
 
+#{
+# "b64image": "string",
+# "user": "name"
+#}
 @app.route("/testPlantAPI", methods = ['POST'])
 def testPlantAPI():
     # Receive base64 image
     info = request.get_json()
-    b64Image = request['b64image']
+    b64Image = info['b64image']
     decoded = base64.b64decode(b64Image)
     file_like = BytesIO(decoded)
 
@@ -255,9 +263,22 @@ def testPlantAPI():
     result = response.json()
 
     # Parse JSON
-    speciesName = (result['bestMatch'])
+    species = (result['results'][0]['species']['scientificNameWithoutAuthor'])
     commonName = (result['results'][0]['species']['commonNames'][0])
-    return ("Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(speciesName,commonName,result))
+    family = (result['results'][0]['species']['family']['scientificNameWithoutAuthor'])
+    genus = (result['results'][0]['species']['genus']['scientificNameWithoutAuthor'])
+
+    addPlantToUser()
+    return ("Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(species,commonName,result))
+
+def addPlantToUser(user_name, family, species, genus, common):
+    plant = Plants.query.filter_by(species_name = species).first()
+    user = User.query.filter_by(username = user_name).first()
+    if not plant:
+        db.session.add(Plants(family, species, genus, common, "Rare"))
+        plant = Plants.query.filter_by(species_name = species).first()
+    db.session.add(User_Plants(user.id, plant.id))
+
 
 #{
 # "species_name": "name",
