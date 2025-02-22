@@ -113,14 +113,13 @@ def returnScore():
     name = data['user']
     user = User.query.filter_by(username = name).first()
     multiplier = user.daily_multiplier
-    # If multiplier has increased
     new_mult = score.getMultDict(steps)
-    if  new_mult < multiplier:
+    if  new_mult != multiplier: # new_mult should always be >= multiplier
         # Retrieve relevant fields
         daily_score = user.daily_score
         total_score = user.score
 
-        ## update score
+        # Update score
         total_score -= daily_score
         daily_score = (daily_score / multiplier) * new_mult
         total_score += daily_score
@@ -133,50 +132,10 @@ def returnScore():
         db.session.commit()
     return jsonify({"user_score": user.score}), 200
 
-
-    
-
-
-
-    
-        
-    
-
-
 @app.route("/")
 def home():
     return jsonify(message="Hello from Flask!")
     # return render_template("index.html")
-# app/app.py
-
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'users.db')
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# db = SQLAlchemy(app)
-
-# class User(db.Model):
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     username = db.Column(db.String(100), nullable=False, unique = True)
-#     password = db.Column(db.String(100), nullable=False)
-
-#     def __init__(self, username, password):
-#         self.username = username
-#         self.password = password
-
-
-
-# def makeDB():
-#     with app.app_context():
-#         db.create_all()  # Create tables based on the defined models
-
-# app.secret_key = 'your-secret-key-here'  # Required for sessions
-
-# @app.route("/")
-# def home():
-#     if 'user_id' in session:
-#         user = User.query.get(session['user_id'])
-#         return render_template("index.html")
-#     return render_template("index.html")
 
 @app.route('/upload-photo', methods=['POST'])
 def upload_photo():
@@ -251,6 +210,12 @@ def testPlantAPI():
     # Receive base64 image
     data = request.get_json()
     b64Image = data['b64']
+<<<<<<< HEAD
+=======
+    username = data.get("user")
+    user = User.filter_by(username = username)
+
+>>>>>>> 6c9bd785c4e732cccbda3af1d8dec857b694014a
     decoded = base64.b64decode(b64Image)
     file_like = BytesIO(decoded)
 
@@ -268,8 +233,22 @@ def testPlantAPI():
     family = (result['results'][0]['species']['family']['scientificNameWithoutAuthor'])
     genus = (result['results'][0]['species']['genus']['scientificNameWithoutAuthor'])
 
-    addPlantToUser()
+    storedPlant = Plants.query.filter_by(id=1).first(species_name = species).first()
+    newPlant = False
+    if not storedPlant:
+        newPlant = True
+    else:
+        user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = storedPlant.id)
+        if not user_has_plant:
+            newPlant = True
+    addPlantToUser(username,family,species,genus,commonName)
     rarity = (Plants.query.filter_by(species_name = species).first()).rarity
+    scoreToAdd = score.scoreAlgorithm(newPlant, rarity, user.daily_multiplier)
+    if user.num_pics_today > 5:
+        scoreToAdd = score.scoreAlgorithm(newPlant, rarity, user.daily_multiplier)
+        user.score += scoreToAdd
+        user.num_pics_today -= 1
+        db.session.commit()
 
     return jsonify({"family": family, "species": species, "genus": genus, "common_name": commonName, "rarity": rarity})
 
@@ -303,14 +282,13 @@ def plantinfo():
     return jsonify({"plant_family": plant.family_name, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
 
 if __name__ == "__main__":
+    makeDB()
     # with app.app_context():
-    #     makeDB()
     #     new_user = User("theRat", "ratatouille25")
     #     db.session.add(new_user)
     #     new_plant = Plants("grass", "green grass", "grass blade")
     #     db.session.add(new_plant)
     #     db.session.add(User_Plants(1,1))
     #     db.session.commit()
-    makeDB()
     # check for new day so we can reset num_pics_today
     app.run(debug=True)
