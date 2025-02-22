@@ -41,44 +41,62 @@ def home():
 #         return render_template("index.html")
 #     return render_template("index.html")
 
+@app.route('/upload-photo', methods=['POST'])
+def upload_photo():
+    try:
+        # Get the base64 image data
+        image_data = request.form['image']
+        
+        # Convert base64 to image and save
+        image_path = "static/img/photo.jpg"
+        os.makedirs(os.path.dirname(image_path), exist_ok=True)
+        
+        with open(image_path, "wb") as fh:
+            fh.write(base64.b64decode(image_data))
+        
+        return jsonify({'success': True, 'path': image_path})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
 @app.route("/Steps")
 def steps():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template("./templates/Steps.html")
 
-# @app.route("/Login", methods=['GET', 'POST'])
-# def login():
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         password = request.form.get('password')
+@app.route("/Login", methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
         
-#         user = User.query.filter_by(username=username, password=password).first()
+        user = User.query.filter_by(username=username, password=password).first()
         
-#         if user:
-#             session['user_id'] = user.id
-#             return redirect(url_for('home'))
-#         return redirect(url_for('login'))
+        if user:
+            session['user_id'] = user.id
+            return redirect(url_for('home'))
+        return redirect(url_for('login'))
     
-#     return render_template("./templates/Login.html")
+    return render_template("./templates/Login.html")
 
-# @app.route("/Register", methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         password = request.form.get('password')
+@app.route("/Register", methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
         
-#         existing_user = User.query.filter_by(username=username).first()
-#         if existing_user:
-#             return redirect(url_for('register'))
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            return redirect(url_for('register'))
         
-#         new_user = User(username=username, password=password)
-#         db.session.add(new_user)
-#         db.session.commit()
+        new_user = User(username=username, password=password)
+        db.session.add(new_user)
+        db.session.commit()
         
-#         return redirect(url_for('login'))
+        return redirect(url_for('login'))
     
-#     return render_template("./templates/Register.html")
+    return render_template("./templates/Register.html")
 
 @app.route("/logout")
 def logout():

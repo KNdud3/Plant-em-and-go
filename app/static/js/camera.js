@@ -1,17 +1,21 @@
-import { Camera, CameraResultType, CameraSource } from 'https://cdn.jsdelivr.net/npm/@capacitor/camera/dist/esm/index.js';
+import { Camera, CameraResultType, CameraSource } from '/@capacitor/camera';
 
-window.takePhoto = async function() {
-    try {
-        const image = await Camera.getPhoto({
-            quality: 90,
-            allowEditing: false,
-            resultType: CameraResultType.Uri,
-            source: CameraSource.Camera
-        });
+        // Function to take a picture
+        async function takePicture() {
+            console.log("hello")
+            try {
+                const photo = await Camera.getPhoto({
+                    resultType: CameraResultType.Uri,
+                    source: CameraSource.Camera,
+                    quality: 100
+                });
+                const imageUrl = photo.webPath;
+                document.getElementById('photo').src = imageUrl;
+            } catch (error) {
+                console.error("Error taking picture: ", error);
 
-        document.getElementById("capturedImage").src = image.webPath;
-        document.getElementById("capturedImage").style.display = "block";
-    } catch (error) {
-        console.error("Camera error:", error);
-    }
-};
+            }
+        }
+
+        document.getElementById('cameraButton').addEventListener('click', takePicture);
+
