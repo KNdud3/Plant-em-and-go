@@ -142,6 +142,54 @@ def returnScore():
 @app.route("/")
 def home():
     return jsonify(message="Hello from Flask!")
+    # return render_template("index.html")
+# app/app.py
+
+
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'users.db')
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# db = SQLAlchemy(app)
+
+# class User(db.Model):
+#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     username = db.Column(db.String(100), nullable=False, unique = True)
+#     password = db.Column(db.String(100), nullable=False)
+
+#     def __init__(self, username, password):
+#         self.username = username
+#         self.password = password
+
+
+
+# def makeDB():
+#     with app.app_context():
+#         db.create_all()  # Create tables based on the defined models
+
+# app.secret_key = 'your-secret-key-here'  # Required for sessions
+
+# @app.route("/")
+# def home():
+#     if 'user_id' in session:
+#         user = User.query.get(session['user_id'])
+#         return render_template("index.html")
+#     return render_template("index.html")
+
+@app.route('/upload-photo', methods=['POST'])
+def upload_photo():
+    try:
+        # Get the base64 image data
+        image_data = request.form['image']
+        
+        # Convert base64 to image and save
+        image_path = "static/img/photo.jpg"
+        os.makedirs(os.path.dirname(image_path), exist_ok=True)
+        
+        with open(image_path, "wb") as fh:
+            fh.write(base64.b64decode(image_data))
+        
+        return jsonify({'success': True, 'path': image_path})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 
 @app.route("/Steps")
@@ -174,7 +222,7 @@ def register():
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             return redirect(url_for('register'))
-        
+
         new_user = User(username=username, password=password)
         db.session.add(new_user)
         db.session.commit()
