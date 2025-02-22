@@ -7,6 +7,8 @@ import datetime
 import json
 from io import BytesIO, BufferedReader
 import base64
+from helpers import score
+
 
 app = Flask(__name__, template_folder='static')
 CORS(app)
@@ -61,6 +63,7 @@ class Date(db.Model):
 
 
 
+
 def makeDB():
     with app.app_context():
         db.create_all()  # Create tables based on the defined models
@@ -74,8 +77,10 @@ def checkDate():
     dateInts = [int(i) for i in data.get("date").split("-")]
     currDate = datetime.date(dateInts[0], dateInts[1], dateInts[2])
     storedDate = Date.query.filter_by(id=1).first()
+    print(storedDate.current_date)
     if not storedDate:
-        addDate = Date()
+        print("No date")
+        addDate = Date(currDate)
         db.session.add(addDate)
         db.session.commit()
         return jsonify({"status": "new_day"}), 200
@@ -91,10 +96,43 @@ def checkDate():
         return jsonify({"status": "new_day"}), 200
     return jsonify({"status": "same_day"}), 200  # No change in date
 
-#{steps: `step num`}
+#{
+# steps: `step num`,
+# user: 'name'
+#}
+# change daily = (daily / mult) * new mult
 @app.route('/updateScore', methods=['POST'])
 def returnScore():
+    # Parse JSON
     data = request.get_json()
+    steps = data['steps']
+    name = data['user']
+    user = User.query.filter_by(username = name).first()
+    multiplier = user.daily_multiplier
+    # If multiplier has increased
+    new_mult = score.getMultDict(steps)
+    if  new_mult < multiplier:
+        # Retrieve relevant fields
+        daily_score = user.daily_score
+        total_score = user.score
+
+        ## update score
+        total_score -= daily_score
+        daily_score = (daily_score / multiplier) * new_mult
+        total_score += daily_score
+
+        # Update database fields
+        user.total_score = total_score
+        user.daily_score = daily_score
+        user.multiplier = new_mult
+
+        db.session.commit()
+    return jsonify({"user_score": user.score}), 200
+
+
+    
+
+
 
     
         
@@ -173,14 +211,24 @@ def testPlantAPI():
     commonName = (result['results'][0]['species']['commonNames'][0])
     return ("Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(speciesName,commonName,result))
 
-
-@app.route("/plantinfo", methods = ['GET'])
+#{
+# "species_name": "name",
+# "user": "name"
+#}
+@app.route("/plantinfo", methods = ['POST'])
 def plantinfo():
     data = request.get_json()
-    name = data['species_name']
-    plant = Plants.query.filter_by(species_name = name).first()
-    return f"This plant comes from the {plant.family_name} family!\nIt's scientific name is {plant.species_name}, but it is commonly referred to as {plant.common_name}"
+    plant_name = data['species_name']
+    user_name = data['user']
+    plant = Plants.query.filter_by(species_name = plant_name).first()
+    user = User.query.filter_by(username = user_name).first()
+    user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = plant.id)
 
+    has_plant = False
+    if user_has_plant:
+        has_plant = True
+
+    return jsonify({"plant_family": plant.family_name, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
 
 if __name__ == "__main__":
     # with app.app_context():
