@@ -53,7 +53,8 @@ class User_Plants(db.Model):
 # Stores the date so we can know when the user has entered a new day
 class Date(db.Model):
     __tablename__ = "Date"
-    current_date = db.Column(db.Date, nullable = False, primary_key = True, default = datetime.date.today)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    current_date = db.Column(db.Date, nullable = False, default = datetime.date.today)
 
 
 
@@ -63,6 +64,30 @@ def makeDB():
 
 app.secret_key = 'your-secret-key-here'  # Required for sessions
 
+#{"date" : "YYYY-MM-DD"}
+@app.route('/receivedate', methods=['POST'])
+def checkDate():
+    data = request.get_json()
+    dateInts = [int(i) for i in data.get("date").split("-")]
+    currDate = datetime.date(dateInts[0], dateInts[1], dateInts[2])
+    storedDate = Date.query.filter_by(id=1).first()
+    if not storedDate:
+        addDate = Date()
+        db.session.add(addDate)
+        db.session.commit()
+        return jsonify({"status": "new_day"}), 200
+    elif storedDate.current_date != currDate:
+        # Bulk update: Set daily_score to 0, num_pics_today to 0 and daily_multiplier to 1 for all users
+        db.session.query(User).update({
+            User.daily_score: 0,
+            User.daily_multiplier: 1,
+            User.num_pics_today: 0
+        })
+        # Commit changes to the database
+        return jsonify({"status": "new_day"}), 200
+    return jsonify({"status": "same_day"}), 200  # No change in date
+        
+    
 
 
 @app.route("/")
@@ -75,6 +100,39 @@ def steps():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template("./templates/Steps.html")
+
+@app.route("/Login", methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(username=username, password=password).first()
+        
+        if user:
+            session['user_id'] = user.id
+            return redirect(url_for('home'))
+        return redirect(url_for('login'))
+    
+    return render_template("./templates/Login.html")
+
+@app.route("/Register", methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            return redirect(url_for('register'))
+        
+        new_user = User(username=username, password=password)
+        db.session.add(new_user)
+        db.session.commit()
+        
+        return redirect(url_for('login'))
+    
+    return render_template("./templates/Register.html")
 
 
 @app.route("/logout")
@@ -99,14 +157,6 @@ def testPlantAPI():
 
 
 if __name__ == "__main__":
-    # with app.app_context():
-        # makeDB()
-        # new_user = User("theRat", "ratatouille25")
-        # db.session.add(new_user)
-        # new_plant = Plants("grass", "green grass", "grass blade")
-        # db.session.add(new_plant)
-        # db.session.add(User_Plants(1,1))
-        # db.session.commit()
     makeDB()
     # check for new day so we can reset num_pics_today
     app.run(debug=True)
