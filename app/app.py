@@ -252,6 +252,8 @@ def testPlantAPI():
     data = request.get_json()
     b64Image = data['b64']
     # print(f"Received request to /testPlantAPI\nImage:{b64Image}")
+    info = request.get_json()
+    b64Image = info['b64image']
     decoded = base64.b64decode(b64Image)
     file_like = BytesIO(decoded)
 
@@ -266,7 +268,23 @@ def testPlantAPI():
     # Parse JSON
     species = (result['results'][0]['species']['scientificNameWithoutAuthor'])
     commonName = (result['results'][0]['species']['commonNames'][0])
-    return ("Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(speciesName,commonName,result))
+    family = (result['results'][0]['species']['family']['scientificNameWithoutAuthor'])
+    genus = (result['results'][0]['species']['genus']['scientificNameWithoutAuthor'])
+
+    addPlantToUser()
+    rarity = (Plants.query.filter_by(species_name = species).first()).rarity
+
+    return jsonify({"family": family, "species": species, "genus": genus, "common_name": commonName, "rarity": rarity})
+
+def addPlantToUser(user_name, family, species, genus, common):
+    plant = Plants.query.filter_by(species_name = species).first()
+    user = User.query.filter_by(username = user_name).first()
+    if not plant:
+        db.session.add(Plants(family, species, genus, common, "Rare"))
+        plant = Plants.query.filter_by(species_name = species).first()
+    db.session.add(User_Plants(user.id, plant.id))
+    db.session.commit()
+
 
 #{
 # "species_name": "name",
