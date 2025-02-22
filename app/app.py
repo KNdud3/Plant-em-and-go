@@ -210,12 +210,9 @@ def testPlantAPI():
     # Receive base64 image
     data = request.get_json()
     b64Image = data['b64']
-<<<<<<< HEAD
-=======
     username = data.get("user")
     user = User.filter_by(username = username)
 
->>>>>>> 6c9bd785c4e732cccbda3af1d8dec857b694014a
     decoded = base64.b64decode(b64Image)
     file_like = BytesIO(decoded)
 
