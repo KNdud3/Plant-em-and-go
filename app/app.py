@@ -5,6 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 import requests
 import datetime
 import json
+from io import BytesIO, BufferedReader
+import base64
+
 app = Flask(__name__, template_folder='static')
 CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'users.db')
@@ -83,9 +86,17 @@ def checkDate():
             User.daily_multiplier: 1,
             User.num_pics_today: 0
         })
-        # Commit changes to the database
+        storedDate.current_date = currDate
+        db.session.commit()
         return jsonify({"status": "new_day"}), 200
     return jsonify({"status": "same_day"}), 200  # No change in date
+
+#{steps: `step num`}
+@app.route('/updateScore', methods=['POST'])
+def returnScore():
+    data = request.get_json()
+
+    
         
     
 
@@ -141,11 +152,18 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route("/testPlantAPI")
+@app.route("/testPlantAPI", methods = ['POST'])
 def testPlantAPI():
+    # Receive base64 image
+    info = request.get_json()
+    b64Image = request['b64image']
+    decoded = base64.b64decode(b64Image)
+    file_like = BytesIO(decoded)
+
     # Make request to plant API and return a JSON string with correct information
     api_url = "https://my-api.plantnet.org/v2/identify/all?nb-results=1&api-key=2b10sbrhApe42g9nJ0ypm2lcO"
-    image = open("../assets/dandelion.jpg", 'rb')
+    # image = open("../assets/dandelion.jpg", 'rb')
+    image = BufferedReader(file_like)
     file = [('images', image)]
     response = requests.post(api_url, files=file, data = {})
     result = response.json()
@@ -156,7 +174,23 @@ def testPlantAPI():
     return ("Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(speciesName,commonName,result))
 
 
+@app.route("/plantinfo", methods = ['GET'])
+def plantinfo():
+    data = request.get_json()
+    name = data['species_name']
+    plant = Plants.query.filter_by(species_name = name).first()
+    return f"This plant comes from the {plant.family_name} family!\nIt's scientific name is {plant.species_name}, but it is commonly referred to as {plant.common_name}"
+
+
 if __name__ == "__main__":
+    # with app.app_context():
+    #     makeDB()
+    #     new_user = User("theRat", "ratatouille25")
+    #     db.session.add(new_user)
+    #     new_plant = Plants("grass", "green grass", "grass blade")
+    #     db.session.add(new_plant)
+    #     db.session.add(User_Plants(1,1))
+    #     db.session.commit()
     makeDB()
     # check for new day so we can reset num_pics_today
     app.run(debug=True)
