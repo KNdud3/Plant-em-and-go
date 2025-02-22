@@ -7,6 +7,12 @@ def scoreAlgorithm(new_plant, plant_rarity, multiplier):
     for i in range(5):
         if (plant_rarity == rarity[i]):
             plant_score = scores[i]
+    if new_plant:
+        multiplier*=2
 
-    return plant_score * multiplier    
+    return plant_score * multiplier
+
+def getMultDict(num):
+    multList = [1,2,3,4,5]
+    return multList[int(num/2000)]
 

@@ -83,9 +83,17 @@ def checkDate():
             User.daily_multiplier: 1,
             User.num_pics_today: 0
         })
-        # Commit changes to the database
+        storedDate.current_date = currDate
+        db.session.commit()
         return jsonify({"status": "new_day"}), 200
     return jsonify({"status": "same_day"}), 200  # No change in date
+
+#{steps: `step num`}
+@app.route('/updateScore', methods=['POST'])
+def returnScore():
+    data = request.get_json()
+
+    
         
     
 
