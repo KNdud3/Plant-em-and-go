@@ -40,8 +40,8 @@ class Plants(db.Model):
     common_name = db.Column(db.String(50), nullable = False)
     rarity = db.Column(db.String(50), nullable = False, default = "Rare")
 
-    def __init__(self, family_name, species_name, genus, common_name, rarity):
-        self.family_name = family_name
+    def __init__(self, family, species_name, genus, common_name, rarity):
+        self.family = family
         self.species_name = species_name
         self.genus = genus
         self.common_name = common_name
@@ -171,8 +171,8 @@ def login():
         
         if user:
             session['user_id'] = user.id
-            return redirect(url_for('home'))
-        return redirect(url_for('login'))
+            return jsonify({"result":"login successful"})
+        return jsonify({"result":"login not successful"})
     
     return render_template("./templates/Login.html")
 
@@ -184,13 +184,13 @@ def register():
         
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
-            return redirect(url_for('register'))
+            return jsonify({"result":"username taken"})
 
         new_user = User(username=username, password=password)
         db.session.add(new_user)
         db.session.commit()
         
-        return redirect(url_for('login'))
+        return jsonify({"result":"registration successful"})
     
     return render_template("./templates/Register.html")
 
@@ -276,34 +276,42 @@ def plantinfo():
     if user_has_plant:
         has_plant = True
 
-    return jsonify({"plant_family": plant.family_name, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
+    return jsonify({"plant_family": plant.family, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
 
 
 def bulkAddPlants():
-    directory = os.fsencode("../plantImages")
+    directory = "C:\Coding projects\Plant 'em and go\Plant--em-and-go\plantImages" 
 
-    for file in os.listdir(directory):
-        filename = os.fsdecode(file)
-        image = open(os.path.join(directory,filename), 'rb')
+    for filename in os.listdir(directory):  
+        filepath = os.path.join(directory, filename) 
+        with open(filepath, 'rb') as image:
+            # Make request to plant API
+            api_url = "https://my-api.plantnet.org/v2/identify/all?nb-results=1&api-key=2b10sbrhApe42g9nJ0ypm2lcO"
+            files = [('images', image)]
+            response = requests.post(api_url, files=files, data={})
+            
+            if response.status_code != 200:
+                print(f"API Error for {filename}: {response.status_code}")
+                continue  # Skip this plant if API fails
 
-        # Make request to plant API and return a JSON string with correct information
-        api_url = "https://my-api.plantnet.org/v2/identify/all?nb-results=1&api-key=2b10sbrhApe42g9nJ0ypm2lcO"
-        file = [('images', image)]
-        response = requests.post(api_url, files=file, data = {})
-        result = response.json()
-        # Parse JSON
-        species = (result['results'][0]['species']['scientificNameWithoutAuthor'])
-        commonName = (result['results'][0]['species']['commonNames'][0])
-        family = (result['results'][0]['species']['family']['scientificNameWithoutAuthor'])
-        genus = (result['results'][0]['species']['genus']['scientificNameWithoutAuthor'])
+            result = response.json()
+            
+            # Parse JSON safely
+            species = result['results'][0]['species'].get('scientificNameWithoutAuthor', 'Unknown')
+            commonName = result['results'][0]['species'].get('commonNames', ['Unknown'])[0]
+            family = result['results'][0]['species']['family'].get('scientificNameWithoutAuthor', 'Unknown')
+            genus = result['results'][0]['species']['genus'].get('scientificNameWithoutAuthor', 'Unknown')
 
-        plant = Plants.query.filter_by(species_name = species).first()
-
-        if not plant:
-            db.session.add(Plants(family, species, genus, commonName, score.getRandomRarity()))
-
+            # Check if the plant already exists
+            plant = Plants.query.filter_by(species_name=species).first()
+            if not plant:
+                new_plant = Plants(family, species, genus, commonName, score.getRandomRarity())
+                db.session.add(new_plant)
+                db.session.commit() 
 if __name__ == "__main__":
     makeDB()
+    with app.app_context():
+        bulkAddPlants()
     # with app.app_context():
     #     new_user = User("theRat", "ratatouille25")
     #     db.session.add(new_user)
