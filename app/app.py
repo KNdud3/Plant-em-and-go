@@ -241,10 +241,10 @@ def testPlantAPI():
     addPlantToUser(username,family,species,genus,commonName)
     rarity = (Plants.query.filter_by(species_name = species).first()).rarity
     scoreToAdd = score.scoreAlgorithm(newPlant, rarity, user.daily_multiplier)
-    if user.num_pics_today > 5:
+    if user.num_pics_today < 5:
         scoreToAdd = score.scoreAlgorithm(newPlant, rarity, user.daily_multiplier)
         user.score += scoreToAdd
-        user.num_pics_today -= 1
+        user.num_pics_today += 1
         db.session.commit()
 
     return jsonify({"family": family, "species": species, "genus": genus, "common_name": commonName, "rarity": rarity})
