@@ -273,7 +273,7 @@ def testPlantAPI():
         user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = storedPlant.id).first()
         if not user_has_plant:
             newPlant = True
-    addPlantToUser(username,family,species,genus,commonName)
+    addPlantToUser(username,family,species,genus,commonName, decoded)
     rarity = (Plants.query.filter_by(species_name = species).first()).rarity
     if user.num_pics_today < 5:
         scoreToAdd = score.scoreAlgorithm(newPlant, rarity, user.daily_multiplier)
@@ -283,11 +283,13 @@ def testPlantAPI():
 
     return jsonify({"family": family, "species": species, "genus": genus, "common_name": commonName, "rarity": rarity})
 
-def addPlantToUser(user_name, family, species, genus, common):
+def addPlantToUser(user_name, family, species, genus, common, img):
     plant = Plants.query.filter_by(species_name = species).first()
     user = User.query.filter_by(username = user_name).first()
     if not plant:
         db.session.add(Plants(family, species, genus, common, score.getRandomRarity()))
+        with open("static/plantImages/" + species + ".jpg", "wb") as f:
+            f.write(img)
         plant = Plants.query.filter_by(species_name = species).first()
     user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = plant.id).first()
     if not user_has_plant:
