@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Capacitor + Flask App</title>
-    <script defer src="js/app.js"></script>
+    <script defer src="./js/globals.js"></script>
+    <script defer src="./js/authentication.js"></script>
+    
     <link rel = "stylesheet" href = "./css/index.css">
 </head>
 <body>
@@ -17,8 +19,8 @@
 <a href="#contact" onclick="loadPage('contact')">Contact</a> -->
 
 <h1>Plant them on the go!</h1>
-<a href="./templates/distance.html">Go to distance</a>
-<a href = "./templates/dummyMain.html"> Go to main</a>
+<!-- <a href="./templates/distance.html">Go to distance</a>
+<a href = "./templates/dummyMain.html"> Go to main</a> -->
 
 
 
@@ -28,10 +30,13 @@
             <input type="text" id="username" name="username" placeholder="Username" required>
             <input type="password" id="password" name="password" placeholder="Password" required>
             <div classname = "logins">
-                <button type="submit" class="login-btn" href="./templates/main.html">Login</button>
-                <button type="button" class="register-btn" onclick="registerUser()">Register</button>
+                <p  class="login-btn" id="login-btn">Login</p>
+                <p  class="register-btn" id ="register-btn">Register</p>
+                
             </div>
+    
         </form>
+        <div id="error-msg"></div>
     </div>
 
     
