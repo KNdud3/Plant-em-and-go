@@ -129,7 +129,6 @@ def checkDate():
     return jsonify({"status": "same_day"}), 200  # No change in date
 
 #{
-# steps: `step num`,
 # user: 'name'
 #}
 # change daily = (daily / mult) * new mult
@@ -137,10 +136,8 @@ def checkDate():
 def returnScore():
     # Parse JSON
     data = request.get_json()
-    steps = data['steps']
     name = data['user']
     user = User.query.filter_by(username = name).first()
-    user.daily_steps += steps
     multiplier = user.daily_multiplier
     new_mult = score.getMultDict(steps)
     if  new_mult != multiplier: # new_mult should always be >= multiplier
@@ -159,7 +156,18 @@ def returnScore():
         user.multiplier = new_mult
 
         db.session.commit()
-    return jsonify({"user_score": user.score, "steps":user.daily_steps}), 200
+    return jsonify({"user_score": user.score}), 200
+
+# {"steps": step number (integer)
+#  "user": 'name'}
+@app.route('/updateSteps', methods=['POST'])
+def returnScore():
+    data = request.get_json()
+    name = data['user']
+    user = User.query.filter_by(username = name).first()
+    user.daily_steps += data['steps']
+    db.session.commit()
+
 
 @app.route("/")
 def home():
@@ -362,10 +370,12 @@ def leaderboard():
 
 #         if not plant:
 #             db.session.add(Plants(family, species, genus, commonName, score.getRandomRarity()))
+#             db.session.commit()
 
 if __name__ == "__main__":
     makeDB()
     # with app.app_context():
+    #     bulkAddPlants()
     #     new_user = User("theRat", "ratatouille25")
     #     db.session.add(new_user)
     #     new_plant = Plants("grass", "green grass", "grass blade")
