@@ -6,16 +6,17 @@
     <title>Steps</title>
     <script defer src="../js/globals.js"></script>
     <script defer src = "../js/camera.js"></script>
-    <script defer src = "../js/steps.js"></script>
+    <script defer src = "../js/distance.js"></script>
     <script src="https://unpkg.com/@capacitor/core@latest/dist/capacitor.js"></script>
     <link rel="stylesheet" href="../css/camera.css"> 
 </head>
 <body>
-    <div class="steps">Steps: <p id="stepsData">Nothing yet</p></div>
+    
 
     <!-- Camera Icon -->
     <button class="camera-icon" id="cameraButton" >📷</button>
-
+    <p>Distance: <span id="distanceData">Nothing yet</span></p>
+    <button id ="StartStop">Start Journey</button>
     <!-- Captured Image -->
     <p id="capturedImage" alt="Captured Image">Not working</p>
 

@@ -2,6 +2,7 @@ from flask import Flask, render_template,jsonify, request, redirect, url_for, se
 from flask_cors import CORS
 import os
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func, desc, over
 import requests
 import datetime
 import json
@@ -26,9 +27,10 @@ class User(db.Model):
     daily_score = db.Column(db.Integer, nullable = False, default = 0)
     num_pics_today = db.Column(db.Integer, nullable = False, default = 0)
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, score):
         self.username = username
         self.password = password
+        self.score = score
 
 class Plants(db.Model):
     __tablename__ = "Plants"
@@ -278,40 +280,64 @@ def plantinfo():
 
     return jsonify({"plant_family": plant.family, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
 
+    return jsonify({"plant_family": plant.family_name, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
 
-def bulkAddPlants():
-    directory = "C:\Coding projects\Plant 'em and go\Plant--em-and-go\plantImages" 
+@app.route("/leaderboard")
+def leaderboard():
+    users = User.query.order_by(desc(User.score)).all()
+    query = db.session.query(
+        func.row_number().over(order_by=desc(User.score)).label('row_number'),  # Add row number as a column
+        User.username,
+        User.score,
+    ).all()
+    # Process the results
+    results = [{"rank": user.row_number, "name": user.username, "score": user.score} for user in query]
+    return jsonify({"users": results})
 
-    for filename in os.listdir(directory):  
-        filepath = os.path.join(directory, filename) 
-        with open(filepath, 'rb') as image:
-            # Make request to plant API
-            api_url = "https://my-api.plantnet.org/v2/identify/all?nb-results=1&api-key=2b10sbrhApe42g9nJ0ypm2lcO"
-            files = [('images', image)]
-            response = requests.post(api_url, files=files, data={})
+
+# def addDummyUsers():
+#     db.session.add(User(username = "theRat", password = "ratatouille25", score = 0))
+#     db.session.add(User(username = "theRat2", password = "ratatouille25", score = 653))
+#     db.session.add(User(username = "theRat3", password = "ratatouille25", score = 435))
+#     db.session.add(User(username = "theRat4", password = "ratatouille25", score = 6465))
+#     db.session.add(User(username = "theRat5", password = "ratatouille25", score = 555))
+#     db.session.add(User(username = "theRat6", password = "ratatouille25", score = 2233))
+#     db.session.add(User(username = "theRat7", password = "ratatouille25", score = 20))
+#     db.session.add(User(username = "theRat8", password = "ratatouille25", score = -1))
+#     db.session.commit()
+
+    
+
+# def bulkAddPlants():
+#     directory = "C:\Coding projects\Plant 'em and go\Plant--em-and-go\plantImages" 
+
+#     for filename in os.listdir(directory):  
+#         filepath = os.path.join(directory, filename) 
+#         with open(filepath, 'rb') as image:
+#             # Make request to plant API
+#             api_url = "https://my-api.plantnet.org/v2/identify/all?nb-results=1&api-key=2b10sbrhApe42g9nJ0ypm2lcO"
+#             files = [('images', image)]
+#             response = requests.post(api_url, files=files, data={})
             
-            if response.status_code != 200:
-                print(f"API Error for {filename}: {response.status_code}")
-                continue  # Skip this plant if API fails
+#             if response.status_code != 200:
+#                 print(f"API Error for {filename}: {response.status_code}")
+#                 continue  # Skip this plant if API fails
 
-            result = response.json()
+#             result = response.json()
             
-            # Parse JSON safely
-            species = result['results'][0]['species'].get('scientificNameWithoutAuthor', 'Unknown')
-            commonName = result['results'][0]['species'].get('commonNames', ['Unknown'])[0]
-            family = result['results'][0]['species']['family'].get('scientificNameWithoutAuthor', 'Unknown')
-            genus = result['results'][0]['species']['genus'].get('scientificNameWithoutAuthor', 'Unknown')
+#             # Parse JSON safely
+#             species = result['results'][0]['species'].get('scientificNameWithoutAuthor', 'Unknown')
+#             commonName = result['results'][0]['species'].get('commonNames', ['Unknown'])[0]
+#             family = result['results'][0]['species']['family'].get('scientificNameWithoutAuthor', 'Unknown')
+#             genus = result['results'][0]['species']['genus'].get('scientificNameWithoutAuthor', 'Unknown')
 
-            # Check if the plant already exists
-            plant = Plants.query.filter_by(species_name=species).first()
-            if not plant:
-                new_plant = Plants(family, species, genus, commonName, score.getRandomRarity())
-                db.session.add(new_plant)
-                db.session.commit() 
+#         plant = Plants.query.filter_by(species_name = species).first()
+
+#         if not plant:
+#             db.session.add(Plants(family, species, genus, commonName, score.getRandomRarity()))
+
 if __name__ == "__main__":
     makeDB()
-    with app.app_context():
-        bulkAddPlants()
     # with app.app_context():
     #     new_user = User("theRat", "ratatouille25")
     #     db.session.add(new_user)
