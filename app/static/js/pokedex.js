@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         plantItem.innerHTML = `
             <div class="plant-card">
-                <img src="../../plantImages/${plant.species_name}.jpg" alt="${plant.common_name}" class="plant-image">
+                <img src= "../plantImages/${plant.species_name}.jpg" alt="My Image">            
             </div>
         `;
 

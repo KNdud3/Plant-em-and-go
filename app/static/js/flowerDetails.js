@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             // Update the DOM with plant details
             document.getElementById("flower-name").textContent = plant.common_name;
-            document.getElementById("flower-image").src = `../../plantImages/${plant.common_name}`;
+            document.getElementById("flower-image").src = `../plantImages/${plant.species_name}.jpg`;
             document.getElementById("flower-image").alt = plant.common_name;
 
             // Create and populate details section
