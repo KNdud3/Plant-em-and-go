@@ -1,5 +1,5 @@
 let lastLocation = null;
-let totalDistance = 0;
+let totalDistance;
 let watchId = null;
 let tracking = false;
 const Geolocation = Capacitor.Plugins.Geolocation;
@@ -11,6 +11,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 
 async function toggleJourney(){
+    totalDistance = parseInt(document.getElementById("distance-travelled").innerText)
+    console.log(totalDistance)
     if(!tracking){
         startJourney()
         document.getElementById("StartStop").innerText = "Stop Journey"
@@ -32,12 +34,12 @@ async function requestPermissions() {
 async function startJourney() {
     if (!await requestPermissions()) return;
     
-    totalDistance = 0;
+
     lastLocation = null;
     tracking = true;
 
     watchId = Geolocation.watchPosition(
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
+        { enableHighAccuracy: true, timeout: 3000, maximumAge: 0 },
         (position, err) => {
             if (err) {
                 console.error("Geolocation error:", err);
@@ -49,11 +51,10 @@ async function startJourney() {
 
             if (lastLocation) {
                 const distance = calculateDistance(lastLocation, newLocation);
-                const distanceThreshold = 5; // in meters
+                const distanceThreshold = 3; // in meters
                 if (distance > distanceThreshold) {
-                    totalDistance += distance;
-                    console.log(`Total Distance: ${totalDistance.toFixed(2)} meters`);
-                    document.getElementById("distanceData").innerText = totalDistance.toFixed(2);
+                    totalDistance = parseInt(totalDistance + distance);
+                    document.getElementById("distance-travelled").innerText = totalDistance;
                 }
                 
 
@@ -71,8 +72,7 @@ function stopJourney() {
         Geolocation.clearWatch({ id: watchId });
         watchId = null;
         tracking = false;
-        console.log(`Journey stopped. Final Distance: ${totalDistance.toFixed(2)} meters`);
-        document.getElementById("distanceData").innerText = totalDistance;
+        document.getElementById("distance-travelled").innerText = totalDistance;
     }
 }
 

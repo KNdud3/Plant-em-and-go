@@ -3,6 +3,8 @@ body {
     background-color: #ccd5ae;
     margin: 0;
     padding: 20px;
+    min-height: 100vh; /* Ensure body takes full viewport height */
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .container {
@@ -78,3 +80,45 @@ body {
     transform: translateY(-4px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+.backButton {
+    position: fixed;
+    bottom: 20px;  /* Changed from top to bottom */
+    left: 20px;
+    background-color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 1000; /* Ensure it stays above other content */
+}
+
+.backButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.backButton p {
+    margin: 0;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+
+@media screen and (max-width: 768px) {
+    body {
+        padding: 10px; /* Reduce padding on mobile */
+    }
+
+    .container {
+        grid-template-columns: repeat(2, calc(50% - 5px)); /* Exactly half width minus half the gap */
+        gap: 10px; /* Reduce gap on mobile */
+        padding: 10px;
+    }
+    .backButton {
+        bottom: 10px;  /* Adjust bottom spacing for mobile */
+        left: 10px;
+        padding: 8px 16px;
+    }
+}
+
