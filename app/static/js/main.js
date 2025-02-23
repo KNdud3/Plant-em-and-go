@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Access a specific query parameter
     username = params.get('user'); // Replace 'paramName' with the name of your query parameter
     console.log(username)
+    document.getElementById("user-tag").innerText = username
     
     // Get current date in ISO format (YYYY-MM-DD)
     const currentDate = new Date().toISOString().split("T")[0];
@@ -63,6 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         pointsElement.innerText = data["user_score"]
         distElement.innerText = data["steps"]
         sessionStartSteps = data["steps"]
+        console.log(`session start steps:${sessionStartSteps}`)
         currentSteps = data["steps"]
     } catch (error) {
         console.error("Error:", error);
@@ -71,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function goCompendium(){
     console.log("here")
-    currentSteps = sessionStartSteps+10
+    currentSteps = document.getElementById("distance-travelled").innerText
     try {
         // Send request to backend
         const response = await fetch(`${serverURl}/updateSteps`, {
@@ -93,7 +95,7 @@ async function goCompendium(){
 }
 
 async function goCam(){
-    currentSteps = sessionStartSteps+10
+    currentSteps = document.getElementById("distance-travelled").innerText
     try {
         // Send request to backend
         const response = await fetch(`${serverURl}/updateSteps`, {
