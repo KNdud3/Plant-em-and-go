@@ -128,11 +128,12 @@ def checkDate():
 @app.route('/updateScore', methods=['POST'])
 def returnScore():
     # Parse JSON
+    
     data = request.get_json()
     name = data['user']
     user = User.query.filter_by(username = name).first()
     multiplier = user.daily_multiplier
-    new_mult = score.getMultDict(steps)
+    new_mult = score.getMultDict(user.daily_steps)
     if  new_mult != multiplier: # new_mult should always be >= multiplier
         # Retrieve relevant fields
         daily_score = user.daily_score
@@ -154,12 +155,14 @@ def returnScore():
 # {"steps": step number (integer)
 #  "user": 'name'}
 @app.route('/updateSteps', methods=['POST'])
-def returnScore():
+def incrementSteps():
+    print("here")
     data = request.get_json()
     name = data['user']
     user = User.query.filter_by(username = name).first()
     user.daily_steps += data['steps']
     db.session.commit()
+    return ""
 
 
 @app.route("/")
