@@ -102,10 +102,10 @@ def checkDate():
     dateInts = [int(i) for i in data.get("date").split("-")]
     currDate = datetime.date(dateInts[0], dateInts[1], dateInts[2])
     storedDate = Date.query.filter_by(id=1).first()
-    print(storedDate.current_date)
+    # print(storedDate.current_date)
     if not storedDate:
         print("No date")
-        addDate = Date(currDate)
+        addDate = Date()
         db.session.add(addDate)
         db.session.commit()
         return jsonify({"status": "new_day"}), 200
@@ -129,11 +129,12 @@ def checkDate():
 @app.route('/updateScore', methods=['POST'])
 def returnScore():
     # Parse JSON
+    
     data = request.get_json()
     name = data['user']
     user = User.query.filter_by(username = name).first()
     multiplier = user.daily_multiplier
-    new_mult = score.getMultDict(steps)
+    new_mult = score.getMultDict(user.daily_steps)
     if  new_mult != multiplier: # new_mult should always be >= multiplier
         # Retrieve relevant fields
         daily_score = user.daily_score
@@ -161,6 +162,7 @@ def incrementSteps():
     user = User.query.filter_by(username = name).first()
     user.daily_steps += data['steps']
     db.session.commit()
+    return ""
 
 
 @app.route("/")
@@ -320,7 +322,7 @@ def leaderboard():
         User.score,
     ).all()
     # Process the results
-    results = [{"rank": user.row_number, "name": user.username, "score": user.score} for user in query]
+    results = [{"rank": user.row_number, "name": user.username, "score": user.score, "plants-identified": User_Plants.query.filter_by(user_id = user.id).count()} for user in query]
     return jsonify({"users": results})
 
 
