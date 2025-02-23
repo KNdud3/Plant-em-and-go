@@ -99,7 +99,7 @@ async function goCompendium() {
 // ✅ Navigate to Leaderboard and pass `user` parameter
 function goLeaderboard() {
     console.log("Navigating to Leaderboard...");
-    window.location.href = `./leaderboard.html?user=${encodeURIComponent(username)}`;
+    window.location.href = `./leaderBoard.html?user=${encodeURIComponent(username)}`;
 }
 
 // ✅ Handle Camera button click and pass `user` parameter
@@ -119,7 +119,6 @@ async function goCam() {
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        
 
         // ✅ Redirect with `user` parameter (if applicable)
         // You can add redirection here if needed
