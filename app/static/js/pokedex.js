@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function loadPlants() {
         try {
             const response = await fetch(`${serverURl}/getallplants`);
-            plants = await response.json();
+            const plants = await response.json();
             container.innerHTML = '';
 
             plants["data"].forEach(plant => {
@@ -25,15 +25,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         plantItem.innerHTML = `
             <div class="plant-card">
-                <img src= "../plantImages/${plant.species_name}.jpg" alt="My Image">            
+                <img src="../plantImages/${plant.species_name}.jpg" alt="${plant.species_name}">            
             </div>
         `;
 
-        // Add click handler that passes species_name
+        // Handle plant click
         plantItem.addEventListener("click", () => {
             window.location.href = `flowerDetails.html?species_name=${encodeURIComponent(plant.species_name)}`;
         });
 
         return plantItem;
+    }
+
+    // ✅ Set back button behavior once (not inside createPlantItem)
+    const urlParams = new URLSearchParams(window.location.search);
+    const user = urlParams.get('user'); // Get the user parameter
+
+    const backButton = document.getElementById('backButton');
+    if (backButton) {
+        backButton.addEventListener('click', () => {
+            window.location.href = `dummyMain.html${user ? '?user=' + encodeURIComponent(user) : ''}`;
+        });
     }
 });
