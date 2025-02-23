@@ -80,6 +80,30 @@ body {
     transform: translateY(-4px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+.backButton {
+    position: fixed;
+    bottom: 20px;  /* Changed from top to bottom */
+    left: 20px;
+    background-color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 1000; /* Ensure it stays above other content */
+}
+
+.backButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.backButton p {
+    margin: 0;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
 
 @media screen and (max-width: 768px) {
     body {
@@ -87,15 +111,14 @@ body {
     }
 
     .container {
-        grid-template-columns: repeat(2, 1fr); /* Show 2 items per row on mobile */
+        grid-template-columns: repeat(2, calc(50% - 5px)); /* Exactly half width minus half the gap */
         gap: 10px; /* Reduce gap on mobile */
         padding: 10px;
     }
-}
-
-/* Small mobile styles */
-@media screen and (max-width: 480px) {
-    .container {
-        grid-template-columns: repeat(1, 1fr); /* Show 1 item per row on small mobile */
+    .backButton {
+        bottom: 10px;  /* Adjust bottom spacing for mobile */
+        left: 10px;
+        padding: 8px 16px;
     }
 }
+
