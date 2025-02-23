@@ -29,10 +29,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             const detailsSection = document.createElement("div");
             detailsSection.className = "plant-details";
             detailsSection.innerHTML = `
-                <p><strong>Common Name:</strong> ${plant.common_name}</p>
-                <p><strong>Species:</strong> ${plant.species_name}</p>
                 <p><strong>Family:</strong> ${plant.family}</p>
                 <p><strong>Genus:</strong> ${plant.genus}</p>
+                <p><strong>Species:</strong> ${plant.species_name}</p>
+                <p><strong>Common Name:</strong> ${plant.common_name}</p>
                 <p class="rarity-tag ${plant.rarity.toLowerCase()}"><strong>Rarity:</strong> ${plant.rarity}</p>
             `;
 
