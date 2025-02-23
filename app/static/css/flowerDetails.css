@@ -1,28 +1,117 @@
-body{
+/* Ensure consistent box sizing */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Background and font settings */
+body {
     background-color: #ccd5ae;
-
-}
-
-.details-container {
-    text-align: center;
+    margin: 0;
     padding: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.6;
 }
 
-.details-container img {
-    width: 200px;
+/* Main container */
+.details-container {
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Title */
+#flower-name {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Image */
+#flower-image {
+    display: block;
+    max-width: 100%;
     height: auto;
-    margin: 10px 0;
+    margin: 0 auto 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Details section */
+.plant-details {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.plant-details p {
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+/* Rarity tags */
+.rarity-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    text-transform: capitalize;
+}
+
+.common { background-color: #e0e0e0; color: #333; }
+.uncommon { background-color: #81c784; color: white; }
+.epic { background-color: #b481c7; color: rgb(0, 0, 0); }
+.rare { background-color: #64b5f6; color: white; }
+.legendary { background-color: #ffd54f; color: #333; }
+
+/* Collection status */
+.collection-status {
+    color: #2ecc71;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+/* Button styles */
 button {
-    padding: 10px 15px;
-    background-color: #4CAF50;
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: #4a5859;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.2s ease-in-out;
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #5c6b6c;
+}
+
+/* Accessibility: Focus state */
+button:focus {
+    outline: 3px solid #5c6b6c;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .details-container {
+        padding: 15px;
+    }
+
+    .plant-details {
+        padding: 15px;
+    }
+
+    button {
+        font-size: 1em;
+        padding: 8px 16px;
+    }
 }
