@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function loadPlants() {
         try {
             const response = await fetch(`${serverURl}/getallplants`);
-            alert("hello")
             plants = await response.json();
             container.innerHTML = '';
 
@@ -26,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         plantItem.innerHTML = `
             <div class="plant-card">
-                <img src="{{ url_for('static', filename='plantImages/${plant.species_name}.jpg') }}" alt="My Image">            
+                <img src= "../plantImages/${plant.species_name}.jpg" alt="My Image">            
             </div>
         `;
 
