@@ -25,6 +25,7 @@ class User(db.Model):
     score = db.Column(db.Integer, nullable=False, default = 0)
     daily_multiplier = db.Column(db.Float, nullable = False, default = 1)
     daily_score = db.Column(db.Integer, nullable = False, default = 0)
+    daily_steps = db.Column(db.Integer, nullable = False, default = 0)
     num_pics_today = db.Column(db.Integer, nullable = False, default = 0)
 
     def __init__(self, username, password):
@@ -93,6 +94,7 @@ def checkDate():
         # Bulk update: Set daily_score to 0, num_pics_today to 0 and daily_multiplier to 1 for all users
         db.session.query(User).update({
             User.daily_score: 0,
+            User.daily_steps: 0,
             User.daily_multiplier: 1,
             User.num_pics_today: 0
         })
@@ -113,6 +115,7 @@ def returnScore():
     steps = data['steps']
     name = data['user']
     user = User.query.filter_by(username = name).first()
+    user.daily_steps += steps
     multiplier = user.daily_multiplier
     new_mult = score.getMultDict(steps)
     if  new_mult != multiplier: # new_mult should always be >= multiplier
@@ -131,7 +134,7 @@ def returnScore():
         user.multiplier = new_mult
 
         db.session.commit()
-    return jsonify({"user_score": user.score}), 200
+    return jsonify({"user_score": user.score, "steps":user.daily_steps}), 200
 
 @app.route("/")
 def home():
@@ -280,8 +283,6 @@ def plantinfo():
         has_plant = True
 
     return jsonify({"plant_family": plant.family, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
-
-    return jsonify({"plant_family": plant.family_name, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
 
 @app.route("/leaderboard")
 def leaderboard():
