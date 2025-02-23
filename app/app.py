@@ -149,7 +149,7 @@ def returnScore():
         user.multiplier = new_mult
 
         db.session.commit()
-    return jsonify({"user_score": user.score}), 200
+    return jsonify({"user_score": user.score, "steps":user.daily_steps}), 200
 
 # {"steps": step number (integer)
 #  "user": 'name'}
