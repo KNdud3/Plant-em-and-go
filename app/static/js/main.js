@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("cameraButton").addEventListener("click", goCam);
     document.getElementById("compendium").addEventListener("click", goCompendium);
+    document.getElementById("leaderboardButton").addEventListener("click", goLeaderboard);
     
     console.log("Hello");
 
@@ -93,6 +94,12 @@ async function goCompendium() {
     } catch (error) {
         console.error("Error:", error);
     }
+}
+
+// ✅ Navigate to Leaderboard and pass `user` parameter
+function goLeaderboard() {
+    console.log("Navigating to Leaderboard...");
+    window.location.href = `./leaderboard.html?user=${encodeURIComponent(username)}`;
 }
 
 // ✅ Handle Camera button click and pass `user` parameter
