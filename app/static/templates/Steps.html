@@ -4,19 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Steps</title>
+    <script defer src="../js/globals.js"></script>
     <script defer src = "../js/camera.js"></script>
+    <script defer src = "../js/steps.js"></script>
     <script src="https://unpkg.com/@capacitor/core@latest/dist/capacitor.js"></script>
     <link rel="stylesheet" href="../css/camera.css"> 
 </head>
 <body>
-    <div class="steps">Steps: ___</div>
+    <div class="steps">Steps: <p id="stepsData">Nothing yet</p></div>
 
     <!-- Camera Icon -->
     <button class="camera-icon" id="cameraButton" >📷</button>
 
     <!-- Captured Image -->
-    <img id="capturedImage" alt="Captured Image">
+    <p id="capturedImage" alt="Captured Image">Not working</p>
 
-    <!-- Include Capacitor -->
+   <p id = "plantdata"></p>
 </body>
 </html>

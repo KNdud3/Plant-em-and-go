@@ -7,6 +7,8 @@ import datetime
 import json
 from io import BytesIO, BufferedReader
 import base64
+from helpers import score
+
 
 app = Flask(__name__, template_folder='static')
 CORS(app)
@@ -32,14 +34,18 @@ class Plants(db.Model):
     __tablename__ = "Plants"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    family_name = db.Column(db.String(50), nullable = False)
+    family = db.Column(db.String(50), nullable = False)
     species_name = db.Column(db.String(50), nullable = False)
+    genus = db.Column(db.String(50), nullable = False)
     common_name = db.Column(db.String(50), nullable = False)
+    rarity = db.Column(db.String(50), nullable = False, default = "Rare")
 
-    def __init__(self, family_name, species_name, common_name):
+    def __init__(self, family_name, species_name, genus, common_name, rarity):
         self.family_name = family_name
         self.species_name = species_name
+        self.genus = genus
         self.common_name = common_name
+        self.rarity = rarity
 
 class User_Plants(db.Model):
     __tablename__ = "User_Plants"
@@ -61,6 +67,7 @@ class Date(db.Model):
 
 
 
+
 def makeDB():
     with app.app_context():
         db.create_all()  # Create tables based on the defined models
@@ -74,8 +81,10 @@ def checkDate():
     dateInts = [int(i) for i in data.get("date").split("-")]
     currDate = datetime.date(dateInts[0], dateInts[1], dateInts[2])
     storedDate = Date.query.filter_by(id=1).first()
+    print(storedDate.current_date)
     if not storedDate:
-        addDate = Date()
+        print("No date")
+        addDate = Date(currDate)
         db.session.add(addDate)
         db.session.commit()
         return jsonify({"status": "new_day"}), 200
@@ -91,50 +100,42 @@ def checkDate():
         return jsonify({"status": "new_day"}), 200
     return jsonify({"status": "same_day"}), 200  # No change in date
 
-#{steps: `step num`}
+#{
+# steps: `step num`,
+# user: 'name'
+#}
+# change daily = (daily / mult) * new mult
 @app.route('/updateScore', methods=['POST'])
 def returnScore():
+    # Parse JSON
     data = request.get_json()
+    steps = data['steps']
+    name = data['user']
+    user = User.query.filter_by(username = name).first()
+    multiplier = user.daily_multiplier
+    new_mult = score.getMultDict(steps)
+    if  new_mult != multiplier: # new_mult should always be >= multiplier
+        # Retrieve relevant fields
+        daily_score = user.daily_score
+        total_score = user.score
 
-    
-        
-    
+        # Update score
+        total_score -= daily_score
+        daily_score = (daily_score / multiplier) * new_mult
+        total_score += daily_score
 
+        # Update database fields
+        user.total_score = total_score
+        user.daily_score = daily_score
+        user.multiplier = new_mult
+
+        db.session.commit()
+    return jsonify({"user_score": user.score}), 200
 
 @app.route("/")
 def home():
     return jsonify(message="Hello from Flask!")
     # return render_template("index.html")
-# app/app.py
-
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'users.db')
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# db = SQLAlchemy(app)
-
-# class User(db.Model):
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     username = db.Column(db.String(100), nullable=False, unique = True)
-#     password = db.Column(db.String(100), nullable=False)
-
-#     def __init__(self, username, password):
-#         self.username = username
-#         self.password = password
-
-
-
-# def makeDB():
-#     with app.app_context():
-#         db.create_all()  # Create tables based on the defined models
-
-# app.secret_key = 'your-secret-key-here'  # Required for sessions
-
-# @app.route("/")
-# def home():
-#     if 'user_id' in session:
-#         user = User.query.get(session['user_id'])
-#         return render_template("index.html")
-#     return render_template("index.html")
 
 @app.route('/upload-photo', methods=['POST'])
 def upload_photo():
@@ -165,25 +166,14 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-@app.route("/Login", methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
         
         user = User.query.filter_by(username=username, password=password).first()
-        user = User.query.filter_by(username=username, password=password).first()
         
-        if user:
-            session['user_id'] = user.id
-            return redirect(url_for('home'))
-        return redirect(url_for('login'))
         if user:
             session['user_id'] = user.id
             return redirect(url_for('home'))
         return redirect(url_for('login'))
     
-    return render_template("./templates/Login.html")
     return render_template("./templates/Login.html")
 
 @app.route("/Register", methods=['GET', 'POST'])
@@ -191,27 +181,15 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-@app.route("/Register", methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
         
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             return redirect(url_for('register'))
-        existing_user = User.query.filter_by(username=username).first()
-        if existing_user:
-            return redirect(url_for('register'))
-        
-        new_user = User(username=username, password=password)
-        db.session.add(new_user)
-        db.session.commit()
+
         new_user = User(username=username, password=password)
         db.session.add(new_user)
         db.session.commit()
         
-        return redirect(url_for('login'))
         return redirect(url_for('login'))
     
     return render_template("./templates/Register.html")
@@ -223,11 +201,18 @@ def logout():
     return redirect(url_for('home'))
 
 
+#{
+# "b64image": "string",
+# "user": "name"
+#}
 @app.route("/testPlantAPI", methods = ['POST'])
 def testPlantAPI():
     # Receive base64 image
-    info = request.get_json()
-    b64Image = request['b64image']
+    data = request.get_json()
+    b64Image = data['b64']
+    username = data.get("user")
+    user = User.filter_by(username = username)
+
     decoded = base64.b64decode(b64Image)
     file_like = BytesIO(decoded)
 
@@ -240,28 +225,91 @@ def testPlantAPI():
     result = response.json()
 
     # Parse JSON
-    speciesName = (result['bestMatch'])
+    species = (result['results'][0]['species']['scientificNameWithoutAuthor'])
     commonName = (result['results'][0]['species']['commonNames'][0])
-    return ("Species: {} <br> Common Name = {} <br> <br> <br> Results: <br> {}".format(speciesName,commonName,result))
+    family = (result['results'][0]['species']['family']['scientificNameWithoutAuthor'])
+    genus = (result['results'][0]['species']['genus']['scientificNameWithoutAuthor'])
+
+    storedPlant = Plants.query.filter_by(id=1).first(species_name = species).first()
+    newPlant = False
+    if not storedPlant:
+        newPlant = True
+    else:
+        user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = storedPlant.id)
+        if not user_has_plant:
+            newPlant = True
+    addPlantToUser(username,family,species,genus,commonName)
+    rarity = (Plants.query.filter_by(species_name = species).first()).rarity
+    scoreToAdd = score.scoreAlgorithm(newPlant, rarity, user.daily_multiplier)
+    if user.num_pics_today < 5:
+        scoreToAdd = score.scoreAlgorithm(newPlant, rarity, user.daily_multiplier)
+        user.score += scoreToAdd
+        user.num_pics_today += 1
+        db.session.commit()
+
+    return jsonify({"family": family, "species": species, "genus": genus, "common_name": commonName, "rarity": rarity})
+
+def addPlantToUser(user_name, family, species, genus, common):
+    plant = Plants.query.filter_by(species_name = species).first()
+    user = User.query.filter_by(username = user_name).first()
+    if not plant:
+        db.session.add(Plants(family, species, genus, common, score.getRandomRarity()))
+        plant = Plants.query.filter_by(species_name = species).first()
+    db.session.add(User_Plants(user.id, plant.id))
+    db.session.commit()
 
 
-@app.route("/plantinfo", methods = ['GET'])
+#{
+# "species_name": "name",
+# "user": "name"
+#}
+@app.route("/plantinfo", methods = ['POST'])
 def plantinfo():
     data = request.get_json()
-    name = data['species_name']
-    plant = Plants.query.filter_by(species_name = name).first()
-    return f"This plant comes from the {plant.family_name} family!\nIt's scientific name is {plant.species_name}, but it is commonly referred to as {plant.common_name}"
+    plant_name = data['species_name']
+    user_name = data['user']
+    plant = Plants.query.filter_by(species_name = plant_name).first()
+    user = User.query.filter_by(username = user_name).first()
+    user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = plant.id)
 
+    has_plant = False
+    if user_has_plant:
+        has_plant = True
+
+    return jsonify({"plant_family": plant.family_name, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
+
+
+def bulkAddPlants():
+    directory = os.fsencode("../plantImages")
+
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        image = open(os.path.join(directory,filename), 'rb')
+
+        # Make request to plant API and return a JSON string with correct information
+        api_url = "https://my-api.plantnet.org/v2/identify/all?nb-results=1&api-key=2b10sbrhApe42g9nJ0ypm2lcO"
+        file = [('images', image)]
+        response = requests.post(api_url, files=file, data = {})
+        result = response.json()
+        # Parse JSON
+        species = (result['results'][0]['species']['scientificNameWithoutAuthor'])
+        commonName = (result['results'][0]['species']['commonNames'][0])
+        family = (result['results'][0]['species']['family']['scientificNameWithoutAuthor'])
+        genus = (result['results'][0]['species']['genus']['scientificNameWithoutAuthor'])
+
+        plant = Plants.query.filter_by(species_name = species).first()
+
+        if not plant:
+            db.session.add(Plants(family, species, genus, commonName, score.getRandomRarity()))
 
 if __name__ == "__main__":
+    makeDB()
     # with app.app_context():
-    #     makeDB()
     #     new_user = User("theRat", "ratatouille25")
     #     db.session.add(new_user)
     #     new_plant = Plants("grass", "green grass", "grass blade")
     #     db.session.add(new_plant)
     #     db.session.add(User_Plants(1,1))
     #     db.session.commit()
-    makeDB()
     # check for new day so we can reset num_pics_today
     app.run(debug=True)
