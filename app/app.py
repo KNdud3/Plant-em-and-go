@@ -253,7 +253,7 @@ def addPlantToUser(user_name, family, species, genus, common):
     plant = Plants.query.filter_by(species_name = species).first()
     user = User.query.filter_by(username = user_name).first()
     if not plant:
-        db.session.add(Plants(family, species, genus, common, "Rare"))
+        db.session.add(Plants(family, species, genus, common, score.getRandomRarity()))
         plant = Plants.query.filter_by(species_name = species).first()
     db.session.add(User_Plants(user.id, plant.id))
     db.session.commit()
@@ -277,6 +277,30 @@ def plantinfo():
         has_plant = True
 
     return jsonify({"plant_family": plant.family_name, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
+
+
+def bulkAddPlants():
+    directory = os.fsencode("../plantImages")
+
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        image = open(os.path.join(directory,filename), 'rb')
+
+        # Make request to plant API and return a JSON string with correct information
+        api_url = "https://my-api.plantnet.org/v2/identify/all?nb-results=1&api-key=2b10sbrhApe42g9nJ0ypm2lcO"
+        file = [('images', image)]
+        response = requests.post(api_url, files=file, data = {})
+        result = response.json()
+        # Parse JSON
+        species = (result['results'][0]['species']['scientificNameWithoutAuthor'])
+        commonName = (result['results'][0]['species']['commonNames'][0])
+        family = (result['results'][0]['species']['family']['scientificNameWithoutAuthor'])
+        genus = (result['results'][0]['species']['genus']['scientificNameWithoutAuthor'])
+
+        plant = Plants.query.filter_by(species_name = species).first()
+
+        if not plant:
+            db.session.add(Plants(family, species, genus, commonName, score.getRandomRarity()))
 
 if __name__ == "__main__":
     makeDB()
