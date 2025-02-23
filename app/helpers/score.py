@@ -23,5 +23,8 @@ def getRandomRarity():
 
 def getMultDict(num):
     multList = [1,2,3,4,5]
-    return multList[int(num/2000)]
+    index = int(num/2000)
+    if index > 5:
+        index = 5
+    return multList[index]
 

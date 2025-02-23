@@ -10,7 +10,7 @@ from io import BytesIO, BufferedReader
 import base64
 from helpers import score
 
-
+# Basic python files
 app = Flask(__name__, template_folder='static')
 CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'users.db')
@@ -99,10 +99,9 @@ def getallplants():
 @app.route('/receivedate', methods=['POST'])
 def checkDate():
     data = request.get_json()
-    dateInts = [int(i) for i in data.get("date").split("-")]
+    dateInts = [int(i) for i in data.get("date").split("-")] # Split date string into list of ints
     currDate = datetime.date(dateInts[0], dateInts[1], dateInts[2])
     storedDate = Date.query.filter_by(id=1).first()
-    # print(storedDate.current_date)
     if not storedDate:
         print("No date")
         addDate = Date()
@@ -164,7 +163,7 @@ def incrementSteps():
     db.session.commit()
     return ""
 
-
+# Base web page for testing
 @app.route("/")
 def home():
     return jsonify(message="Hello from Flask!")
@@ -188,12 +187,14 @@ def upload_photo():
         return jsonify({'success': False, 'error': str(e)})
 
 
+# Tenplate used for front end testing
 @app.route("/Steps")
 def steps():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template("./templates/Steps.html")
 
+# Basic login system
 @app.route("/Login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -210,6 +211,7 @@ def login():
     
     return render_template("./templates/Login.html")
 
+# Basic registration method
 @app.route("/Register", methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -266,12 +268,14 @@ def testPlantAPI():
     genus = (result['results'][0]['species']['genus']['scientificNameWithoutAuthor'])
 
     storedPlant = Plants.query.filter_by(species_name = species).first()
-    newPlant = False
+    newPlant = False # Needed to check for new plant bonus
     if not storedPlant:
         newPlant = True
     else:
         user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = storedPlant.id).first()
         if not user_has_plant:
+            db.session.add(User_Plants(user.id,storedPlant.id))
+            db.session.commit()
             newPlant = True
     addPlantToUser(username,family,species,genus,commonName, decoded)
     rarity = (Plants.query.filter_by(species_name = species).first()).rarity
@@ -283,18 +287,19 @@ def testPlantAPI():
 
     return jsonify({"family": family, "species": species, "genus": genus, "common_name": commonName, "rarity": rarity})
 
+# Helper function to add plant to a user and save it to directory to be put in compendium
 def addPlantToUser(user_name, family, species, genus, common, img):
-    plant = Plants.query.filter_by(species_name = species).first()
+    plant = Plants.query.filter_by(species_name = species).first() 
     user = User.query.filter_by(username = user_name).first()
     if not plant:
-        db.session.add(Plants(family, species, genus, common, score.getRandomRarity()))
-        with open("static/plantImages/" + species + ".jpg", "wb") as f:
+        db.session.add(Plants(family, species, genus, common, score.getRandomRarity())) # Add plant to DB if not already present
+        with open("static/plantImages/" + species + ".jpg", "wb") as f: # Get file directory to save to
             f.write(img)
             os.sync(f)
         plant = Plants.query.filter_by(species_name = species).first()
     user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = plant.id).first()
     if not user_has_plant:
-        db.session.add(User_Plants(user.id,plant.id))
+        db.session.add(User_Plants(user.id,plant.id)) # Add user plant if needed
     db.session.commit()
 
 
@@ -302,6 +307,7 @@ def addPlantToUser(user_name, family, species, genus, common, img):
 # "species_name": "name",
 # "user": "name"
 #}
+# Post request used for testing plants
 @app.route("/plantinfo", methods = ['POST'])
 def plantinfo():
     data = request.get_json()
@@ -309,20 +315,21 @@ def plantinfo():
     user_name = data['user']
     plant = Plants.query.filter_by(species_name = plant_name).first()
     user = User.query.filter_by(username = user_name).first()
-    user_has_plant = User_Plants.query.filter_by(user.id,plant.id)
+    user_has_plant = User_Plants.query.filter_by(user.id,plant.id) 
 
-    has_plant = False
+    has_plant = False # Needed for front end to grey our un-used parts
     if user_has_plant:
         has_plant = True
 
     return jsonify({"plant_family": plant.family, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
 
+# GET reques for the user data needed for the leaderboard
 @app.route("/leaderboard")
 def leaderboard():
     users = User.query.order_by(desc(User.score)).all()
     query = db.session.query(
-        func.row_number().over(order_by=desc(User.score)).label('row_number'), 
-        User.id,                 # Add row number as a column
+        func.row_number().over(order_by=desc(User.score)).label('row_number'), # Score is descending
+        User.id,
         User.username,
         User.score,
     ).all()
@@ -330,58 +337,6 @@ def leaderboard():
     results = [{"rank": user.row_number, "name": user.username, "score": user.score, "plants-identified": (User_Plants.query.filter_by(user_id = user.id).count())} for user in query]
     return jsonify({"users": results})
 
-
-# def addDummyUsers():
-#     db.session.add(User(username = "theRat", password = "ratatouille25", score = 0))
-#     db.session.add(User(username = "theRat2", password = "ratatouille25", score = 653))
-#     db.session.add(User(username = "theRat3", password = "ratatouille25", score = 435))
-#     db.session.add(User(username = "theRat4", password = "ratatouille25", score = 6465))
-#     db.session.add(User(username = "theRat5", password = "ratatouille25", score = 555))
-#     db.session.add(User(username = "theRat6", password = "ratatouille25", score = 2233))
-#     db.session.add(User(username = "theRat7", password = "ratatouille25", score = 20))
-#     db.session.add(User(username = "theRat8", password = "ratatouille25", score = -1))
-#     db.session.commit()
-
-    
-
-# def bulkAddPlants():
-#     directory = "C:\Coding projects\Plant 'em and go\Plant--em-and-go\plantImages" 
-
-#     for filename in os.listdir(directory):  
-#         filepath = os.path.join(directory, filename) 
-#         with open(filepath, 'rb') as image:
-#             # Make request to plant API
-#             api_url = "https://my-api.plantnet.org/v2/identify/all?nb-results=1&api-key=2b10sbrhApe42g9nJ0ypm2lcO"
-#             files = [('images', image)]
-#             response = requests.post(api_url, files=files, data={})
-            
-#             if response.status_code != 200:
-#                 print(f"API Error for {filename}: {response.status_code}")
-#                 continue  # Skip this plant if API fails
-
-#             result = response.json()
-            
-#             # Parse JSON safely
-#             species = result['results'][0]['species'].get('scientificNameWithoutAuthor', 'Unknown')
-#             commonName = result['results'][0]['species'].get('commonNames', ['Unknown'])[0]
-#             family = result['results'][0]['species']['family'].get('scientificNameWithoutAuthor', 'Unknown')
-#             genus = result['results'][0]['species']['genus'].get('scientificNameWithoutAuthor', 'Unknown')
-
-#         plant = Plants.query.filter_by(species_name = species).first()
-
-#         if not plant:
-#             db.session.add(Plants(family, species, genus, commonName, score.getRandomRarity()))
-#             db.session.commit()
-
 if __name__ == "__main__":
     makeDB()
-    # with app.app_context():
-    #     bulkAddPlants()
-    #     new_user = User("theRat", "ratatouille25")
-    #     db.session.add(new_user)
-    #     new_plant = Plants("grass", "green grass", "grass blade")
-    #     db.session.add(new_plant)
-    #     db.session.add(User_Plants(1,1))
-    #     db.session.commit()
-    # check for new day so we can reset num_pics_today
     app.run(debug=True)
