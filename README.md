@@ -1,5 +1,9 @@
 # Plant 'em and Go
 
-A mobile app that encourages users to get outside, explore nature and increase their activity.
+A mobile app that encourages users to get outside, explore nature, and increase their physical activity!
 
-Users are rewarded from scanning plants and adding them to their plant compendium gaining them rewards. Rewards are multiplied based on the amount of steps users get in a day.
+Users gain reward points by ***scanning plants***, which also indexes the scanned plant in their own personal ***plant compendium***. By scanning a plant, the user reveals additional information about the plant to teach them more about the natural world they are surrounded by. Additionally, the app tracks the steps a user has taken throughout the day. More steps means a greater score ***multiplier*** when scanning a plant!
+
+Plant 'em and Go also features a ***community leaderboard***! Registered users are ranked based on their scores, allowing for some friendly competition. 
+
+---
