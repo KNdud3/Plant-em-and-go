@@ -164,3 +164,9 @@ body {
     transform: scale(0.95);
     background-color: #d0d0d0;
 }
+
+.plant-detail{
+    position:fixed;
+    left:50%;
+    bottom:70%;
+}

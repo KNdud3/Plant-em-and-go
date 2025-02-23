@@ -119,6 +119,7 @@ async function goCam() {
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
+        
 
         // ✅ Redirect with `user` parameter (if applicable)
         // You can add redirection here if needed

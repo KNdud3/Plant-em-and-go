@@ -289,7 +289,9 @@ def addPlantToUser(user_name, family, species, genus, common):
     if not plant:
         db.session.add(Plants(family, species, genus, common, score.getRandomRarity()))
         plant = Plants.query.filter_by(species_name = species).first()
-    db.session.add(User_Plants(user_id=user.id, plant_id=plant.id))
+    user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = plant.id).first()
+    if not user_has_plant:
+        db.session.add(User_Plants(user.id,plant.id))
     db.session.commit()
 
 
@@ -304,7 +306,7 @@ def plantinfo():
     user_name = data['user']
     plant = Plants.query.filter_by(species_name = plant_name).first()
     user = User.query.filter_by(username = user_name).first()
-    user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = plant.id)
+    user_has_plant = User_Plants.query.filter_by(user.id,plant.id)
 
     has_plant = False
     if user_has_plant:
@@ -321,7 +323,7 @@ def leaderboard():
         User.score,
     ).all()
     # Process the results
-    results = [{"rank": user.row_number, "name": user.username, "score": user.score} for user in query]
+    results = [{"rank": user.row_number, "name": user.username, "score": user.score, "plants-identified": User_Plants.query.filter_by(user_id = user.id).count()} for user in query]
     return jsonify({"users": results})
 
 
