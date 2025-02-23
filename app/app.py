@@ -27,10 +27,9 @@ class User(db.Model):
     daily_score = db.Column(db.Integer, nullable = False, default = 0)
     num_pics_today = db.Column(db.Integer, nullable = False, default = 0)
 
-    def __init__(self, username, password, score):
+    def __init__(self, username, password):
         self.username = username
         self.password = password
-        self.score = score
 
 class Plants(db.Model):
     __tablename__ = "Plants"
@@ -166,8 +165,9 @@ def steps():
 @app.route("/Login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
         
         user = User.query.filter_by(username=username, password=password).first()
         
@@ -181,8 +181,9 @@ def login():
 @app.route("/Register", methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
         
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:

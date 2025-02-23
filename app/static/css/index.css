@@ -120,6 +120,13 @@ input[type="password"]::placeholder {
     background-color: #0056b3;
 }
 
+#error-msg{
+    display: flex;
+    justify-content: center;
+    margin-block:10px;
+    color:red;
+}
+
 /* Prevent auto-zoom on input focus for iOS */
 @media screen and (-webkit-min-device-pixel-ratio: 0) { 
     select,
