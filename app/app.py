@@ -79,6 +79,7 @@ app.secret_key = 'your-secret-key-here'  # Required for sessions
 #For pokedex
 @app.route("/getallplants")
 def getallplants():
+    print("here")
     plants = Plants.query.all()
     data=[{
         'species_name': plant.species_name,

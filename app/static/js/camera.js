@@ -1,8 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("cameraButton").addEventListener("click", takePicture);
 });
-async function getData(base64string){
+
+async function getData(base64string) {
     try {
+        // First redirect to flower details page with loading state
+        window.location.href = `flowerDetails.html?loading=true`;
+        
         // Send request to backend
         const response = await fetch(`${serverURl}/testPlantAPI`, {
             method: "POST",
@@ -17,17 +21,20 @@ async function getData(base64string){
         }
 
         const data = await response.json();
-        // console.log("Server Response:", data);
-        document.getElementById("plantdata").innerHTML = JSON.stringify(data)
+        
+        // Redirect to flower details with the species name
+        window.location.href = `flowerDetails.html?species_name=${encodeURIComponent(data.species)}`;
     } catch (error) {
         console.error("Error:", error);
+        // In case of error, redirect to flower details with error state
+        window.location.href = `flowerDetails.html?error=true`;
     }
 }
+
 async function takePicture() {
     console.log("Opening Camera...");
 
     try {
-        // Correct way to access plugins
         const camera = Capacitor.Plugins.Camera;
         
         if (!camera) {
@@ -35,14 +42,12 @@ async function takePicture() {
         }
 
         const photo = await camera.getPhoto({
-            resultType: "dataUrl",  // Use "dataUrl" for base64 images
+            resultType: "dataUrl",
             source: "CAMERA",
             quality: 100
         });
-        const base64String = photo.dataUrl.split(",")[1];  // Removes "data:image/jpeg;base64,"
-        
-        document.getElementById("capturedImage").innerHTML = base64String;
-        getData(base64String)
+        const base64String = photo.dataUrl.split(",")[1];
+        getData(base64String);
     } catch (error) {
         console.error("Error taking picture:", error);
     }
