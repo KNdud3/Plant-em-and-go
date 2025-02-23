@@ -101,10 +101,10 @@ def checkDate():
     dateInts = [int(i) for i in data.get("date").split("-")]
     currDate = datetime.date(dateInts[0], dateInts[1], dateInts[2])
     storedDate = Date.query.filter_by(id=1).first()
-    print(storedDate.current_date)
+    # print(storedDate.current_date)
     if not storedDate:
         print("No date")
-        addDate = Date(currDate)
+        addDate = Date()
         db.session.add(addDate)
         db.session.commit()
         return jsonify({"status": "new_day"}), 200

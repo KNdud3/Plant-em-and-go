@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href = "../css/dummyMain.css"/>
+    <script src="../js/globals.js"></script>
     <script defer src = "../js/camera.js"></script>
-    <script src="https://unpkg.com/@capacitor/core@latest/dist/capacitor.js"></script>
+    <script defer src = "../js/main.js"></script>
+    <!-- <script src="https://unpkg.com/@capacitor/core@latest/dist/capacitor.js"></script> -->
 </head>
 <body>
     <div class = "container">
@@ -26,7 +28,7 @@
                 <img src="../img/flowers-flower.gif" alt="Growing Flower Animation">
             </div>
             <div class = "butt stepsButton">
-                <p>Steps:5000</p>
+                <p>Distance Walked: <span id="distance-travelled">0</span> </p>
             </div>
             <div class = "butt pokedexButton">
                 <a href = "./pokedex.html">pokedex</p>
