@@ -117,6 +117,12 @@ body {
     bottom: 50%;
 }
 
+.leaderboard{
+    position: fixed;
+    left: 20px;
+    bottom: 60%;
+}
+
 .stepsButton {
     position: fixed;
     right: 20px;
