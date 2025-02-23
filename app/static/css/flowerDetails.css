@@ -100,6 +100,10 @@ button:focus {
     outline: 3px solid #5c6b6c;
 }
 
+.cam-emoji{
+    font-size: 50px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
     .details-container {

@@ -1,7 +1,17 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const speciesName = urlParams.get("species_name");
+   // Get the current URL
+   const currentUrl = window.location.href;    
 
+   // Create a URL object from the current URL
+   const url = new URL(currentUrl);
+
+   // Get query parameters using URLSearchParams
+   const params = new URLSearchParams(url.search);
+
+   // Access a specific query parameter
+//    username = params.get('user'); // Replace 'paramName' with the name of your query parameter
+    const speciesName = params.get("species_name");
+    // let speciesName = "Narcissus jonquilla"
     if (speciesName) {
         try {
             const response = await fetch(`${serverURl}/getallplants`);

@@ -1,19 +1,30 @@
+let username;
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("cameraButton").addEventListener("click", takePicture);
+    // // Get the current URL
+    // const currentUrl = window.location.href;    
+
+    // // Create a URL object from the current URL
+    // const url = new URL(currentUrl);
+
+    // // Get query parameters using URLSearchParams
+    // const params = new URLSearchParams(url.search);
+
+    // // Access a specific query parameter
+    // username = params.get('user'); // Replace 'paramName' with the name of your query parameter
 });
 
 async function getData(base64string) {
     try {
-        // First redirect to flower details page with loading state
-        window.location.href = `flowerDetails.html?loading=true`;
-        
+
+        let username = document.getElementById("user-tag").innerText
         // Send request to backend
         const response = await fetch(`${serverURl}/testPlantAPI`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ b64: base64string }),
+            body: JSON.stringify({ b64: base64string , user:username}),
         });
 
         if (!response.ok) {

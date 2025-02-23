@@ -6,20 +6,20 @@
     <title>Steps</title>
     <script defer src="../js/globals.js"></script>
     <script defer src = "../js/camera.js"></script>
-    <script defer src = "../js/distance.js"></script>
     <script src="https://unpkg.com/@capacitor/core@latest/dist/capacitor.js"></script>
-    <link rel="stylesheet" href="../css/camera.css"> 
+    <link rel="stylesheet" href="../css/flowerDetails.css"> 
 </head>
 <body>
     
 
     <!-- Camera Icon -->
-    <button class="camera-icon" id="cameraButton" >📷</button>
-    <p>Distance: <span id="distanceData">Nothing yet</span></p>
-    <button id ="StartStop">Start Journey</button>
-    <!-- Captured Image -->
-    <p id="capturedImage" alt="Captured Image">Not working</p>
-
-   <p id = "plantdata"></p>
+    <button class="camera-icon" id="cameraButton" ><span class="cam-emoji">📷</span></button>
+   
+    <div class="details-container">
+        <h1 id="flower-name"></h1>
+        <img id="flower-image" src="" alt="">
+        <p id="flower-description"></p>
+        <button onclick="goBack()">Go Back</button>
+    </div>
 </body>
 </html>

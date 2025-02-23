@@ -109,6 +109,7 @@ async function goCam(){
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
+        window.location.replace(`./camera.html?user=${username}`)
 
     } catch (error) {
         console.error("Error:", error);
