@@ -2,6 +2,7 @@ from flask import Flask, render_template,jsonify, request, redirect, url_for, se
 from flask_cors import CORS
 import os
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func, desc, over
 import requests
 import datetime
 import json
@@ -26,9 +27,10 @@ class User(db.Model):
     daily_score = db.Column(db.Integer, nullable = False, default = 0)
     num_pics_today = db.Column(db.Integer, nullable = False, default = 0)
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, score):
         self.username = username
         self.password = password
+        self.score = score
 
 class Plants(db.Model):
     __tablename__ = "Plants"
@@ -278,9 +280,34 @@ def plantinfo():
 
     return jsonify({"plant_family": plant.family_name, "plant_species": plant.species_name, "plant_common": plant.common_name, "user_has_plant": has_plant}), 200
 
+@app.route("/leaderboard")
+def leaderboard():
+    users = User.query.order_by(desc(User.score)).all()
+    query = db.session.query(
+        func.row_number().over(order_by=desc(User.score)).label('row_number'),  # Add row number as a column
+        User.username,
+        User.score,
+    ).all()
+    # Process the results
+    results = [{"rank": user.row_number, "name": user.username, "score": user.score} for user in query]
+    return jsonify({"users": results})
+
+
+def addDummyUsers():
+    db.session.add(User(username = "theRat", password = "ratatouille25", score = 0))
+    db.session.add(User(username = "theRat2", password = "ratatouille25", score = 653))
+    db.session.add(User(username = "theRat3", password = "ratatouille25", score = 435))
+    db.session.add(User(username = "theRat4", password = "ratatouille25", score = 6465))
+    db.session.add(User(username = "theRat5", password = "ratatouille25", score = 555))
+    db.session.add(User(username = "theRat6", password = "ratatouille25", score = 2233))
+    db.session.add(User(username = "theRat7", password = "ratatouille25", score = 20))
+    db.session.add(User(username = "theRat8", password = "ratatouille25", score = -1))
+    db.session.commit()
+
+    
 
 def bulkAddPlants():
-    directory = os.fsencode("../plantImages")
+    directory = "C:\Users\wrizv\CompSciY2\AstonHack\Plant-em-and-go\plantImages"
 
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
@@ -304,7 +331,9 @@ def bulkAddPlants():
 
 if __name__ == "__main__":
     makeDB()
-    # with app.app_context():
+    with app.app_context():
+        # addDummyUsers()
+        bulkAddPlants()
     #     new_user = User("theRat", "ratatouille25")
     #     db.session.add(new_user)
     #     new_plant = Plants("grass", "green grass", "grass blade")
