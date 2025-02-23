@@ -5,9 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function loadPlants() {
         try {
             // Fetch plants from your backend
-            alert("hello");
             const response = await fetch(`${serverURl}/getallplants`);
-            // alert(JSON.stringify(await response.json()));
             plants = await response.json()
             // Clear existing content
             container.innerHTML = '';
@@ -63,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const plantDetails = await response.json();
                 
                 // Navigate to the details page with the plant data
-                window.location.href = `flowerDetails.html?id=${plant.id}`;
+                window.location.href = `flowerDetails.html?id=${plant.species_name}`;
 
             } catch (error) {
                 console.error('Error fetching plant details:', error);
