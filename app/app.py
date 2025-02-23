@@ -290,6 +290,7 @@ def addPlantToUser(user_name, family, species, genus, common, img):
         db.session.add(Plants(family, species, genus, common, score.getRandomRarity()))
         with open("static/plantImages/" + species + ".jpg", "wb") as f:
             f.write(img)
+            os.sync(f)
         plant = Plants.query.filter_by(species_name = species).first()
     user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = plant.id).first()
     if not user_has_plant:
