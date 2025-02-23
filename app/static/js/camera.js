@@ -1,23 +1,23 @@
-
+let username;
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("cameraButton").addEventListener("click", takePicture);
-    // // Get the current URL
-    // const currentUrl = window.location.href;    
+    // Get the current URL
+    const currentUrl = window.location.href;    
 
-    // // Create a URL object from the current URL
-    // const url = new URL(currentUrl);
+    // Create a URL object from the current URL
+    const url = new URL(currentUrl);
 
-    // // Get query parameters using URLSearchParams
-    // const params = new URLSearchParams(url.search);
+    // Get query parameters using URLSearchParams
+    const params = new URLSearchParams(url.search);
 
-    // // Access a specific query parameter
-    // username = params.get('user'); // Replace 'paramName' with the name of your query parameter
+    // Access a specific query parameter
+    username = params.get('user'); // Replace 'paramName' with the name of your query parameter
 });
 
 async function getData(base64string) {
     try {
 
-        let username = document.getElementById("user-tag").innerText
+        // let username = document.getElementById("user-tag").innerText
         // Send request to backend
         const response = await fetch(`${serverURl}/testPlantAPI`, {
             method: "POST",
@@ -31,9 +31,25 @@ async function getData(base64string) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const data = await response.json();
-        
-        document.getElementById("plant-data").innerText = JSON.stringify(data)
+        const plant = await response.json();
+         // Update the DOM with plant details
+         document.getElementById("flower-name").textContent = plant.common_name;
+         document.getElementById("flower-image").src = `../plantImages/${plant.species_name}.jpg`;
+         document.getElementById("flower-image").alt = plant.common_name;
+
+         // Create and populate details section
+         const detailsSection = document.createElement("div");
+         detailsSection.className = "plant-details";
+         detailsSection.innerHTML = `
+             <p><strong>Family:</strong> ${plant.family}</p>
+             <p><strong>Genus:</strong> ${plant.genus}</p>
+             <p><strong>Species:</strong> ${plant.species}</p>
+             <p><strong>Common Name:</strong> ${plant.common_name}</p>
+             <p class="rarity-tag ${plant.rarity.toLowerCase()}"><strong>Rarity:</strong> ${plant.rarity}</p>
+         `;
+
+         document.getElementById("flower-description").appendChild(detailsSection);
+        // document.getElementById("plant-data").innerText = JSON.stringify(data)
         // Redirect to flower details with the species name
         // window.location.href = `flowerDetails.html?species_name=${encodeURIComponent(data.species)}`;
     } catch (error) {
@@ -63,4 +79,8 @@ async function takePicture() {
     } catch (error) {
         console.error("Error taking picture:", error);
     }
+}
+
+function goBack(){
+    window.location.replace(`./dummyMain.html?user=${username}`)
 }

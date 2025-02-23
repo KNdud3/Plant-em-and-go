@@ -320,8 +320,8 @@ def plantinfo():
 def leaderboard():
     users = User.query.order_by(desc(User.score)).all()
     query = db.session.query(
-        func.row_number().over(order_by=desc(User.score)).label('row_number'),  # Add row number as a column
-        User.id,
+        func.row_number().over(order_by=desc(User.score)).label('row_number'), 
+        User.id,                 # Add row number as a column
         User.username,
         User.score,
     ).all()
