@@ -1,4 +1,4 @@
-let username;
+
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("cameraButton").addEventListener("click", takePicture);
     // // Get the current URL
@@ -33,8 +33,9 @@ async function getData(base64string) {
 
         const data = await response.json();
         
+        document.getElementById("plant-data").innerText = JSON.stringify(data)
         // Redirect to flower details with the species name
-        window.location.href = `flowerDetails.html?species_name=${encodeURIComponent(data.species)}`;
+        // window.location.href = `flowerDetails.html?species_name=${encodeURIComponent(data.species)}`;
     } catch (error) {
         console.error("Error:", error);
         // In case of error, redirect to flower details with error state

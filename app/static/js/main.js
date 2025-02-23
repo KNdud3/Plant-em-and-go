@@ -112,7 +112,7 @@ async function goCam() {
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        window.location.replace(`./camera.html?user=${username}`)
+        
 
         // ✅ Redirect with `user` parameter (if applicable)
         // You can add redirection here if needed
