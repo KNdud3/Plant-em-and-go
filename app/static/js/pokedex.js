@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function loadPlants() {
         try {
             const response = await fetch(`${serverURl}/getallplants`);
+            alert("hello")
             plants = await response.json();
             container.innerHTML = '';
 
