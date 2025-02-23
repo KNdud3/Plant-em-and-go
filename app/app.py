@@ -307,7 +307,7 @@ def addDummyUsers():
     
 
 def bulkAddPlants():
-    directory = "C:\Users\wrizv\CompSciY2\AstonHack\Plant-em-and-go\plantImages"
+    directory = ("../plantImages")
 
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
@@ -331,9 +331,9 @@ def bulkAddPlants():
 
 if __name__ == "__main__":
     makeDB()
-    with app.app_context():
+    # with app.app_context():
         # addDummyUsers()
-        bulkAddPlants()
+        #bulkAddPlants()
     #     new_user = User("theRat", "ratatouille25")
     #     db.session.add(new_user)
     #     new_plant = Plants("grass", "green grass", "grass blade")
