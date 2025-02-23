@@ -154,7 +154,7 @@ def returnScore():
 # {"steps": step number (integer)
 #  "user": 'name'}
 @app.route('/updateSteps', methods=['POST'])
-def returnScore():
+def incrementSteps():
     data = request.get_json()
     name = data['user']
     user = User.query.filter_by(username = name).first()
