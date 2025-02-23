@@ -246,7 +246,7 @@ def testPlantAPI():
     data = request.get_json()
     b64Image = data['b64']
     username = data.get("user")
-    user = User.filter_by(username = username)
+    user = User.query.filter_by(username = username).first()
 
     decoded = base64.b64decode(b64Image)
     file_like = BytesIO(decoded)
@@ -265,17 +265,16 @@ def testPlantAPI():
     family = (result['results'][0]['species']['family']['scientificNameWithoutAuthor'])
     genus = (result['results'][0]['species']['genus']['scientificNameWithoutAuthor'])
 
-    storedPlant = Plants.query.filter_by(id=1).first(species_name = species).first()
+    storedPlant = Plants.query.filter_by(species_name = species).first()
     newPlant = False
     if not storedPlant:
         newPlant = True
     else:
-        user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = storedPlant.id)
+        user_has_plant = User_Plants.query.filter_by(user_id = user.id, plant_id = storedPlant.id).first()
         if not user_has_plant:
             newPlant = True
     addPlantToUser(username,family,species,genus,commonName)
     rarity = (Plants.query.filter_by(species_name = species).first()).rarity
-    scoreToAdd = score.scoreAlgorithm(newPlant, rarity, user.daily_multiplier)
     if user.num_pics_today < 5:
         scoreToAdd = score.scoreAlgorithm(newPlant, rarity, user.daily_multiplier)
         user.score += scoreToAdd
@@ -290,7 +289,7 @@ def addPlantToUser(user_name, family, species, genus, common):
     if not plant:
         db.session.add(Plants(family, species, genus, common, score.getRandomRarity()))
         plant = Plants.query.filter_by(species_name = species).first()
-    db.session.add(User_Plants(user.id, plant.id))
+    db.session.add(User_Plants(user_id=user.id, plant_id=plant.id))
     db.session.commit()
 
 
