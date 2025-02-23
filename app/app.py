@@ -319,11 +319,12 @@ def leaderboard():
     users = User.query.order_by(desc(User.score)).all()
     query = db.session.query(
         func.row_number().over(order_by=desc(User.score)).label('row_number'),  # Add row number as a column
+        User.id,
         User.username,
         User.score,
     ).all()
     # Process the results
-    results = [{"rank": user.row_number, "name": user.username, "score": user.score, "plants-identified": User_Plants.query.filter_by(user_id = user.id).count()} for user in query]
+    results = [{"rank": user.row_number, "name": user.username, "score": user.score, "plants-identified": (User_Plants.query.filter_by(user_id = user.id).count())} for user in query]
     return jsonify({"users": results})
 
 
