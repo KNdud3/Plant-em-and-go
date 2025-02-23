@@ -18,17 +18,19 @@
 
 <h1>Plant them on the go!</h1>
 <a href="./templates/distance.html">Go to distance</a>
+<a href = "./templates/dummyMain.html"> Go to main</a>
 
 
 
 <body>
     <div class="form-container">
-        <h2>Login</h2>
         <form id="loginForm">
             <input type="text" id="username" name="username" placeholder="Username" required>
             <input type="password" id="password" name="password" placeholder="Password" required>
-            <button type="submit" class="login-btn" href="./templates/main.html">Login</button>
-            <button type="button" class="register-btn" onclick="registerUser()">Register</button>
+            <div classname = "logins">
+                <button type="submit" class="login-btn" href="./templates/main.html">Login</button>
+                <button type="button" class="register-btn" onclick="registerUser()">Register</button>
+            </div>
         </form>
     </div>
 

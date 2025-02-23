@@ -1,0 +1,28 @@
+body{
+    background-color: #ccd5ae;
+
+}
+
+.details-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.details-container img {
+    width: 200px;
+    height: auto;
+    margin: 10px 0;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
