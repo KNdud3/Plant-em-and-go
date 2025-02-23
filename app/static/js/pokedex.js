@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Create the content structure
         plantItem.innerHTML = `
             <div class="plant-card">
-                <img src="/api/placeholder/200/200" alt="${plant.common_name}" class="plant-image">
+                <img src="../../../plantImages/${plant.species_name}" alt="${plant.common_name}" class="plant-image">
                 <div class="plant-info">
                     <h3>${plant.common_name}</h3>
                     <p class="species-name">${plant.species_name}</p>
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const plantDetails = await response.json();
                 
                 // Navigate to the details page with the plant data
-                window.location.href = `flowerDetails.html?id=${plant.species_name}`;
+                window.location.href = `flowerDetails.html?id=${plant.id}`;
 
             } catch (error) {
                 console.error('Error fetching plant details:', error);
@@ -75,33 +75,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 
-// document.addEventListener("DOMContentLoaded", () => {
-//     const flowers = [
-//         { id: 1, name: "Rose", image: "../img/rose.png", description: "A beautiful red flower." },
-//         { id: 2, name: "Tulip", image: "../img/tulip.png", description: "A vibrant spring flower." },
-//         { id: 3, name: "Sunflower", image: "../img/sunflower.png", description: "Follows the sun!" },
-//         { id: 4, name: "Daisy", image: "../img/daisy.png", description: "A simple yet elegant flower." }
-//     ];
-
-//     const container = document.querySelector(".container");
-
-//     function createFlowerItem(flower) {
-//         const flowerItem = document.createElement("div");
-//         flowerItem.classList.add("flower-item");
-//         flowerItem.innerHTML = `
-//             <img src="${flower.image}" alt="${flower.name}">
-//         `;
-//         // <p>${flower.name}</p>
-
-//         // Redirect to details page with query parameter
-//         flowerItem.addEventListener("click", () => {
-//             window.location.href = `flowerDetails.html?id=${flower.id}`;
-//         });
-
-//         return flowerItem;
-//     }
-
-//     flowers.forEach(flower => {
-//         container.appendChild(createFlowerItem(flower));
-//     });
-// });
