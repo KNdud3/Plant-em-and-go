@@ -122,6 +122,7 @@ async function goCam() {
 
         // ✅ Redirect with `user` parameter (if applicable)
         // You can add redirection here if needed
+        window.location.replace(`./camera.html?user=${encodeURIComponent(username)}`);
     } catch (error) {
         console.error("Error:", error);
     }
