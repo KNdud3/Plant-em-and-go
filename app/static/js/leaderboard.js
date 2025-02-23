@@ -55,13 +55,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <td>#${user.rank}</td>
                 <td>${user.name}</td>
                 <td>${user.score}</td>
-                <td>"yo" </td>
             </tr>
         `).join("");
 
     } catch (error) {
         console.error("Error loading leaderboard:", error);
-        leaderboardBody.innerHTML = `<tr><td colspan="4">Error loading leaderboard.</td></tr>`;
+        leaderboardBody.innerHTML = `<tr><td colspan="3">Error loading leaderboard.</td></tr>`;
     }
 
     // Back button navigates back with username
