@@ -1,23 +1,23 @@
-
+let username;
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("cameraButton").addEventListener("click", takePicture);
-    // // Get the current URL
-    // const currentUrl = window.location.href;    
+    // Get the current URL
+    const currentUrl = window.location.href;    
 
-    // // Create a URL object from the current URL
-    // const url = new URL(currentUrl);
+    // Create a URL object from the current URL
+    const url = new URL(currentUrl);
 
-    // // Get query parameters using URLSearchParams
-    // const params = new URLSearchParams(url.search);
+    // Get query parameters using URLSearchParams
+    const params = new URLSearchParams(url.search);
 
-    // // Access a specific query parameter
-    // username = params.get('user'); // Replace 'paramName' with the name of your query parameter
+    // Access a specific query parameter
+    username = params.get('user'); // Replace 'paramName' with the name of your query parameter
 });
 
 async function getData(base64string) {
     try {
 
-        let username = document.getElementById("user-tag").innerText
+        // let username = document.getElementById("user-tag").innerText
         // Send request to backend
         const response = await fetch(`${serverURl}/testPlantAPI`, {
             method: "POST",
