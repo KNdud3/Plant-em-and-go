@@ -9,12 +9,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             const response = await fetch(`${serverURl}/getallplants`);
             // alert(JSON.stringify(await response.json()));
             plants = await response.json()
-            console.log(plants)
             // Clear existing content
             container.innerHTML = '';
 
             // Create and append plant items
-            plants.forEach(plant => {
+            plants["data"].forEach(plant => {
                 const plantItem = createPlantItem(plant);
                 container.appendChild(plantItem);
             });

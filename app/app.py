@@ -79,25 +79,18 @@ app.secret_key = 'your-secret-key-here'  # Required for sessions
 #For pokedex
 @app.route("/getallplants")
 def getallplants():
-    print("here")
     plants = Plants.query.all()
-
-    print( { "data": [{
-            'species_name': plant.species_name,
-            'common_name': plant.common_name,
-            'family': plant.family,
-            'genus': plant.genus,
-            'rarity': plant.rarity
-        }for plant in plants]})
-    return jsonify(
-        { "data": [{
-            'species_name': plant.species_name,
-            'common_name': plant.common_name,
-            'family': plant.family,
-            'genus': plant.genus,
-            'rarity': plant.rarity
-        }for plant in plants]}
-    )
+    data=[{
+        'species_name': plant.species_name,
+        "common_name":plant.common_name,
+        'family': plant.family,
+        'genus': plant.genus,
+        'rarity': plant.rarity
+           
+        } 
+       
+       for plant in plants]
+    return jsonify({"data":data})
 
 
 
