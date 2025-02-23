@@ -156,7 +156,6 @@ def returnScore():
 #  "user": 'name'}
 @app.route('/updateSteps', methods=['POST'])
 def incrementSteps():
-    print("here")
     data = request.get_json()
     name = data['user']
     user = User.query.filter_by(username = name).first()
@@ -322,7 +321,7 @@ def leaderboard():
         User.score,
     ).all()
     # Process the results
-    results = [{"rank": user.row_number, "name": user.username, "score": user.score} for user in query]
+    results = [{"rank": user.row_number, "name": user.username, "score": user.score, "plants-identified": User_Plants.query.filter_by(user_id = user.id).count()} for user in query]
     return jsonify({"users": results})
 
 
